@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Grip.Core/Grip.Core.csproj" />
+    <Project Path="src/Grip/Grip.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Grip.Core.Tests/Grip.Core.Tests.csproj" />
+  </Folder>
+</Solution>

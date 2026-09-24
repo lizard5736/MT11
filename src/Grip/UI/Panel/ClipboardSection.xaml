@@ -1,0 +1,48 @@
+<local:PanelSection x:Class="Grip.UI.Panel.ClipboardSection"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Grip.UI.Panel"
+                    xmlns:clip="clr-namespace:Grip.UI.Clipboard"
+                    xmlns:l="clr-namespace:Grip.UI">
+    <Border Style="{StaticResource Grip.Card}" Padding="8">
+        <StackPanel>
+            <!-- History is off -->
+            <StackPanel x:Name="DisabledPanel" Visibility="Collapsed" Margin="8,6,8,8">
+                <TextBlock Text="{l:T clipboard.disabled}" Style="{StaticResource Grip.Text.Strong}" />
+                <TextBlock Text="{l:T feature.clipboardHistory.desc}" Style="{StaticResource Grip.Text.Secondary}" Margin="0,4,0,12" />
+                <Button Style="{StaticResource Grip.Button.Accent}" Content="{l:T clipboard.enable}" HorizontalAlignment="Left" Click="OnEnable" />
+            </StackPanel>
+
+            <StackPanel x:Name="HistoryPanel">
+                <TextBox x:Name="SearchBox" Style="{StaticResource Grip.TextBox}" Margin="2,2,2,6"
+                         l:TextBoxHelper.Placeholder="{l:T clipboard.search}" l:TextBoxHelper.Icon="Search" l:TextBoxHelper.ClearButton="True"
+                         TextChanged="OnSearch" />
+                <ItemsControl x:Name="Items">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource Grip.Button.ListRow}" Click="OnItemClick" Tag="{Binding}">
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="{l:T clipboard.copy}" l:Ui.Icon="Copy" Click="OnCopy" />
+                                        <MenuItem Header="{l:T clipboard.pin}" l:Ui.Icon="Pin" Click="OnPin" />
+                                        <MenuItem Header="{l:T clipboard.delete}" l:Ui.Icon="Delete" Click="OnDelete" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                                <clip:ClipRow ShowShortcut="False" />
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock x:Name="EmptyText" Style="{StaticResource Grip.Text.Secondary}" Margin="10,10,10,12" Visibility="Collapsed" />
+
+                <Border Style="{StaticResource Grip.Divider}" Margin="0,6,0,6" />
+                <DockPanel Margin="0,0,0,0">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource Grip.Button.Ghost}" l:Ui.Icon="Broom" Content="{l:T common.clear}"
+                            Click="OnClear" />
+                    <Button x:Name="OpenHistoryButton" Style="{StaticResource Grip.Button.Ghost}" l:Ui.Icon="History" HorizontalAlignment="Left"
+                            Click="OnOpenHistory" />
+                </DockPanel>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</local:PanelSection>

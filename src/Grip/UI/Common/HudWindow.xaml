@@ -1,0 +1,25 @@
+<Window x:Class="Grip.UI.Common.HudWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Grip.UI.Controls"
+        Style="{StaticResource Grip.Window}"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False" ShowActivated="False" Topmost="True"
+        SizeToContent="WidthAndHeight" Focusable="False" IsHitTestVisible="False">
+    <Border x:Name="Root" Margin="18" Opacity="0">
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="Shift" Y="8" />
+        </Border.RenderTransform>
+        <Border Background="{DynamicResource Grip.Popup}" BorderBrush="{DynamicResource Grip.LineStrong}" BorderThickness="1"
+                CornerRadius="20" Padding="16,9,18,9">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="18" ShadowDepth="3" Opacity="0.4" Color="{DynamicResource Grip.Color.Shadow}" />
+            </Border.Effect>
+            <StackPanel Orientation="Horizontal">
+                <c:Icon x:Name="Glyph" Size="18" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="{DynamicResource Grip.Accent}" />
+                <TextBlock x:Name="Message" Style="{StaticResource Grip.Text.Strong}" VerticalAlignment="Center" MaxWidth="460"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </Border>
+    </Border>
+</Window>

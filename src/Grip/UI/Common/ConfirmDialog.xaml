@@ -1,0 +1,27 @@
+<Window x:Class="Grip.UI.Common.ConfirmDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Grip.UI.Controls"
+        xmlns:l="clr-namespace:Grip.UI"
+        Style="{StaticResource Grip.Window}"
+        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
+        SizeToContent="Height" Width="400" WindowStartupLocation="CenterScreen">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="0" GlassFrameThickness="0,0,0,1" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+    <Border BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1">
+        <StackPanel Margin="22,20,22,18">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <c:Icon x:Name="Glyph" Kind="QuestionCircle" Size="20" Foreground="{DynamicResource Grip.Accent}" Margin="0,0,10,0" />
+                <TextBlock x:Name="TitleText" Style="{StaticResource Grip.Text.Subtitle}" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+            <TextBlock x:Name="BodyText" Style="{StaticResource Grip.Text.Secondary}" FontSize="13" Margin="30,0,0,0" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button x:Name="CancelButton" Style="{StaticResource Grip.Button}" Content="{l:T common.cancel}" MinWidth="96"
+                        IsCancel="True" Click="OnCancel" />
+                <Button x:Name="OkButton" Style="{StaticResource Grip.Button.Accent}" MinWidth="96" Margin="8,0,0,0"
+                        IsDefault="True" Click="OnOk" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

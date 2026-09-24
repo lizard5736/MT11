@@ -1,0 +1,66 @@
+<Window x:Class="Grip.UI.Panel.FlyoutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Grip.UI.Controls"
+        xmlns:l="clr-namespace:Grip.UI"
+        Style="{StaticResource Grip.Window}"
+        Title="Grip" Width="392" SizeToContent="Height"
+        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" ShowActivated="True">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="0" GlassFrameThickness="0,0,0,1" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+    <Border BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1">
+        <Grid x:Name="Root" Margin="14,14,14,8">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="RootShift" />
+            </Grid.RenderTransform>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Header: mark, name, live status -->
+            <DockPanel Margin="2,0,0,12">
+                <c:GripMark Width="34" Height="34" TileBrush="{DynamicResource Grip.Surface}" VerticalAlignment="Center"
+                            ShowDot="{Binding IsActive, ElementName=StatusDot}" />
+                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="Grip" Style="{StaticResource Grip.Text.Subtitle}" FontSize="16" />
+                    <Border x:Name="StatusPill" Style="{StaticResource Grip.Pill}" HorizontalAlignment="Left" Margin="0,3,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <l:StatusDot x:Name="StatusDot" Width="7" Height="7" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock x:Name="StatusText" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Grip.TextSecondary}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Section tabs -->
+            <Border x:Name="TabsHost" Grid.Row="1" Background="{DynamicResource Grip.Surface}" BorderBrush="{DynamicResource Grip.Line}"
+                    BorderThickness="1" CornerRadius="11" Padding="3" Margin="0,0,0,14">
+                <UniformGrid x:Name="Tabs" Rows="1" />
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer x:Name="Scroller" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          Padding="0,0,2,0" Focusable="False">
+                <ContentControl x:Name="Body" Focusable="False" />
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Grid Grid.Row="3" Margin="-4,8,-4,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button Style="{StaticResource Grip.Button.Ghost}" l:Ui.Icon="Settings" Content="{l:T panel.settings}" Click="OnSettings" />
+                <Button x:Name="LayoutButton" Grid.Column="1" Style="{StaticResource Grip.Button.Ghost}" HorizontalAlignment="Center"
+                        Click="OnToggleLayout" />
+                <Button Grid.Column="2" Style="{StaticResource Grip.Button.Ghost}" l:Ui.Icon="Power" Content="{l:T panel.quit}" Click="OnQuit" />
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

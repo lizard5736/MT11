@@ -1,0 +1,27 @@
+<Window x:Class="Grip.UI.Common.ErrorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Grip.UI.Controls"
+        xmlns:l="clr-namespace:Grip.UI"
+        Style="{StaticResource Grip.Window}"
+        Title="Grip" Width="520" SizeToContent="Height" ResizeMode="NoResize" Topmost="True"
+        WindowStartupLocation="CenterScreen" ShowInTaskbar="True">
+    <StackPanel Margin="22,18,22,18">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <c:Icon Kind="ErrorCircle" Size="22" Foreground="{DynamicResource Grip.Rec}" Margin="0,0,10,0" />
+            <TextBlock Text="{l:T error.title}" Style="{StaticResource Grip.Text.Subtitle}" VerticalAlignment="Center" />
+        </StackPanel>
+        <TextBlock Text="{l:T error.desc}" Style="{StaticResource Grip.Text.Secondary}" FontSize="13" Margin="32,0,0,12" />
+        <Border Style="{StaticResource Grip.Card}" Padding="10" MaxHeight="180">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="Details" Style="{StaticResource Grip.Text.Mono}" TextWrapping="Wrap"
+                           Foreground="{DynamicResource Grip.TextSecondary}" />
+            </ScrollViewer>
+        </Border>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Style="{StaticResource Grip.Button}" l:Ui.Icon="Copy" Content="{l:T error.copy}" Click="OnCopy" />
+            <Button Style="{StaticResource Grip.Button.Accent}" Content="{l:T common.close}" Margin="8,0,0,0" MinWidth="96"
+                    IsDefault="True" IsCancel="True" Click="OnClose" />
+        </StackPanel>
+    </StackPanel>
+</Window>

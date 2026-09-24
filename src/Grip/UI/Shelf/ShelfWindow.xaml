@@ -1,0 +1,99 @@
+<Window x:Class="Grip.UI.Shelf.ShelfWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Grip.UI.Controls"
+        xmlns:l="clr-namespace:Grip.UI"
+        xmlns:local="clr-namespace:Grip.UI.Shelf"
+        Style="{StaticResource Grip.Window}"
+        Title="{l:T shelf.title}" Width="300" Height="360"
+        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" ShowActivated="False" AllowDrop="True">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="0" GlassFrameThickness="0,0,0,1" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+    <Border x:Name="Frame" BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1">
+        <DockPanel>
+            <!-- Title bar (drag to move) -->
+            <DockPanel x:Name="TitleBar" DockPanel.Dock="Top" Margin="14,10,8,6" Background="Transparent" MouseLeftButtonDown="OnDragWindow">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <ToggleButton x:Name="PinToggle" Style="{StaticResource Grip.Tab}" Height="28" MinWidth="28" l:Ui.Icon="Pin"
+                                  ToolTip="{l:T shelf.pin}" Click="OnPin" />
+                    <Button Style="{StaticResource Grip.Button.Icon}" l:Ui.Icon="Broom" ToolTip="{l:T shelf.clear}" Click="OnClear" Width="28" Height="28" />
+                    <Button Style="{StaticResource Grip.Button.Icon}" l:Ui.Icon="Dismiss" ToolTip="{l:T common.close}" Click="OnClose" Width="28" Height="28" />
+                </StackPanel>
+                <c:Icon Kind="TrayItemAdd" Size="18" Foreground="{DynamicResource Grip.Accent}" Margin="0,0,8,0" />
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="{l:T shelf.title}" Style="{StaticResource Grip.Text.Strong}" />
+                    <TextBlock x:Name="CountText" Style="{StaticResource Grip.Text.Caption}" />
+                </StackPanel>
+            </DockPanel>
+
+            <TextBlock DockPanel.Dock="Bottom" Text="{l:T shelf.dragHint}" Style="{StaticResource Grip.Text.Caption}"
+                       HorizontalAlignment="Center" Margin="10,4,10,10" />
+
+            <Grid Margin="10,2,10,4">
+                <!-- Empty drop zone -->
+                <Border x:Name="DropZone" CornerRadius="12" BorderThickness="1.5" Background="{DynamicResource Grip.Surface}">
+                    <Border.BorderBrush>
+                        <DrawingBrush Viewport="0,0,10,10" ViewportUnits="Absolute" TileMode="Tile">
+                            <DrawingBrush.Drawing>
+                                <GeometryDrawing Brush="{DynamicResource Grip.LineStrong}">
+                                    <GeometryDrawing.Geometry>
+                                        <GeometryGroup>
+                                            <RectangleGeometry Rect="0,0,5,5" />
+                                            <RectangleGeometry Rect="5,5,5,5" />
+                                        </GeometryGroup>
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                            </DrawingBrush.Drawing>
+                        </DrawingBrush>
+                    </Border.BorderBrush>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+                        <c:Icon Kind="ArrowDownload" Size="28" Foreground="{DynamicResource Grip.TextTertiary}" HorizontalAlignment="Center" />
+                        <TextBlock Text="{l:T shelf.drop}" Style="{StaticResource Grip.Text.Secondary}" TextAlignment="Center" Margin="0,10,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer x:Name="ItemsScroller" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="Items">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:ShelfItem}">
+                                <Border x:Name="Tile" Width="84" Height="92" Margin="3" CornerRadius="10" Background="{DynamicResource Grip.Surface}"
+                                        BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1" Cursor="Hand"
+                                        MouseLeftButtonDown="OnItemMouseDown" MouseMove="OnItemMouseMove" ToolTip="{Binding Tooltip}">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{l:T shelf.showInFolder}" l:Ui.Icon="FolderOpen" Click="OnShowInFolder"
+                                                      Visibility="{Binding IsFile, Converter={StaticResource BoolToVis}}" />
+                                            <MenuItem Header="{l:T clipboard.copy}" l:Ui.Icon="Copy" Click="OnCopyItem" />
+                                            <MenuItem Header="{l:T common.remove}" l:Ui.Icon="Dismiss" Click="OnRemoveItem" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <StackPanel VerticalAlignment="Center" Margin="6">
+                                        <Grid Width="36" Height="36" HorizontalAlignment="Center">
+                                            <Image Source="{Binding Image}" Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}" />
+                                            <c:Icon Kind="{Binding Icon}" Size="26" Foreground="{DynamicResource Grip.Accent}"
+                                                    Visibility="{Binding HasImage, Converter={StaticResource BoolToVisInverted}}" />
+                                        </Grid>
+                                        <TextBlock Text="{Binding Name}" FontSize="11" TextAlignment="Center" TextWrapping="Wrap" MaxHeight="30"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,6,0,0" Foreground="{DynamicResource Grip.Text}" />
+                                    </StackPanel>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <Trigger SourceName="Tile" Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Tile" Property="Background" Value="{DynamicResource Grip.SurfaceHover}" />
+                                        <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource Grip.LineStrong}" />
+                                    </Trigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </DockPanel>
+    </Border>
+</Window>

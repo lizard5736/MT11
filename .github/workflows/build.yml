@@ -1,0 +1,61 @@
+name: Build
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Unit tests
+        run: dotnet test tests/Grip.Core.Tests/Grip.Core.Tests.csproj -c Release
+
+      - name: Check strings and resources
+        run: |
+          python tools/check_strings.py
+          python tools/check_resources.py
+
+      - name: Publish single-file Grip.exe
+        run: dotnet publish src/Grip/Grip.csproj -c Release -r win-x64 -o publish
+
+      - name: Render screen previews
+        continue-on-error: true
+        timeout-minutes: 5
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path previews | Out-Null
+          Start-Process -FilePath publish\Grip.exe -ArgumentList '--render-previews', "$PWD\previews" -Wait
+          Get-Content previews\render-log.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Grip-win-x64
+          path: publish/Grip.exe
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: previews
+          path: previews/*.png
+          if-no-files-found: ignore
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: publish/Grip.exe
+          generate_release_notes: true
