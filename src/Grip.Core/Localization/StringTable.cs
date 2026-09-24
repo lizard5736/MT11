@@ -19,6 +19,7 @@ public static partial class StringTable
         AddActions(A);
         AddSettings(A);
         AddTools(A);
+        AddMonitor(A);
         return d;
     }
 
@@ -109,6 +110,7 @@ public static partial class StringTable
         A("panel.section.utilities", "Утилиты", "Utilities");
         A("panel.section.controls", "Управление", "Controls");
         A("panel.section.toggles", "Переключатели", "Quick toggles");
+        A("panel.section.monitor", "Мониторинг", "Monitoring");
 
         A("keepAwake.title", "Не давать уснуть", "Keep awake");
         A("keepAwake.off", "Компьютер засыпает как обычно", "Your PC sleeps as usual");
@@ -244,11 +246,11 @@ public static partial class StringTable
         F("monitorMemory", "Память", "Memory",
             "Занятая память и приложения, которые её едят.", "Memory in use and the apps eating it.");
         F("monitorDisk", "Диски", "Disks",
-            "Свободное место и скорость чтения и записи.", "Free space and read/write speed.");
+            "Свободное место на дисках. Скорость чтения и записи — в планах.", "Free space on your drives. Read/write speed is still planned.");
         F("monitorNetwork", "Сеть", "Network",
-            "Скорость, трафик за сессию, локальный IP и тест скорости.", "Speed, session traffic, local IP and a speed test.");
+            "Скорость, трафик за сессию и локальный IP. Тест скорости — в планах.", "Speed, session traffic and local IP. A speed test is still planned.");
         F("monitorBattery", "Батарея", "Battery",
-            "Заряд, здоровье, циклы и расход энергии.", "Charge, health, cycles and power draw.");
+            "Заряд и состояние питания. Здоровье и циклы — в планах.", "Charge and power state. Health and cycle count are still planned.");
         F("cpuTemperature", "Температура CPU", "CPU temperature",
             "Датчики процессора через драйвер PawnIO.", "Processor sensors through the PawnIO driver.");
         F("trayReadouts", "Показатели в трее", "Tray readouts",

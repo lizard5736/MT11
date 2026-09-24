@@ -80,6 +80,7 @@ public sealed class AppServices : IDisposable
     public ShelfController Shelf { get; }
     public RadialController Radial { get; }
     public PanelController Panel { get; } = new();
+    public SystemMonitorService Monitor { get; } = new();
 
     private ClipboardWindow? _clipboardWindow;
     private CommandBarWindow? _commandBar;
@@ -238,6 +239,7 @@ public sealed class AppServices : IDisposable
     public void Dispose()
     {
         Settings.SaveNow();
+        Monitor.Stop();
         KeepAwake.Dispose();
         Clipboard.Dispose();
         Hooks.Dispose();

@@ -55,7 +55,7 @@ public static class PreviewRenderer
             services.Theme.Apply(theme, force: true);
             string suffix = theme == AppTheme.Dark ? "" : "-light";
 
-            foreach (var section in new[] { "keepAwake", "clipboard", "utilities", "controls", "toggles" })
+            foreach (var section in new[] { "keepAwake", "clipboard", "utilities", "controls", "toggles", "monitor" })
             {
                 if (theme == AppTheme.Light && section != "keepAwake" && section != "clipboard") continue;
                 Try($"panel-{section}{suffix}", () =>

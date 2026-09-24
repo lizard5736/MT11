@@ -161,12 +161,12 @@ public static class FeatureCatalog
         new(FeatureIds.MicTools, FeatureGroup.Sound, FeatureStatus.Planned, "MicOff", EnergyProfile.Idle),
 
         // Monitor
-        new(FeatureIds.MonitorCpu, FeatureGroup.Monitor, FeatureStatus.Planned, "DeveloperBoard", EnergyProfile.Periodic),
+        new(FeatureIds.MonitorCpu, FeatureGroup.Monitor, FeatureStatus.Ready, "DeveloperBoard", EnergyProfile.Periodic),
         new(FeatureIds.MonitorGpu, FeatureGroup.Monitor, FeatureStatus.Planned, "Gpu", EnergyProfile.Periodic),
-        new(FeatureIds.MonitorMemory, FeatureGroup.Monitor, FeatureStatus.Planned, "Ram", EnergyProfile.Periodic),
-        new(FeatureIds.MonitorDisk, FeatureGroup.Monitor, FeatureStatus.Planned, "HardDrive", EnergyProfile.Periodic),
-        new(FeatureIds.MonitorNetwork, FeatureGroup.Monitor, FeatureStatus.Planned, "Globe", EnergyProfile.Periodic),
-        new(FeatureIds.MonitorBattery, FeatureGroup.Monitor, FeatureStatus.Planned, "Battery", EnergyProfile.Periodic),
+        new(FeatureIds.MonitorMemory, FeatureGroup.Monitor, FeatureStatus.Ready, "Ram", EnergyProfile.Periodic),
+        new(FeatureIds.MonitorDisk, FeatureGroup.Monitor, FeatureStatus.Ready, "HardDrive", EnergyProfile.Periodic),
+        new(FeatureIds.MonitorNetwork, FeatureGroup.Monitor, FeatureStatus.Ready, "Globe", EnergyProfile.Periodic),
+        new(FeatureIds.MonitorBattery, FeatureGroup.Monitor, FeatureStatus.Ready, "Battery", EnergyProfile.Periodic),
         new(FeatureIds.CpuTemperature, FeatureGroup.Monitor, FeatureStatus.Planned, "Temperature", EnergyProfile.Periodic),
         new(FeatureIds.TrayReadouts, FeatureGroup.Monitor, FeatureStatus.Planned, "DataPie", EnergyProfile.Periodic),
         new(FeatureIds.MonitorAlerts, FeatureGroup.Monitor, FeatureStatus.Planned, "Alert", EnergyProfile.Periodic),

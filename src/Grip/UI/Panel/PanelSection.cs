@@ -41,6 +41,9 @@ public sealed record PanelSectionDef(
                 .Any(s.IsInstalled), () => new ControlsSection()),
         new("toggles", "panel.section.toggles", "Grid", "toggles",
             s => s.IsInstalled(FeatureIds.QuickToggles), () => new TogglesSection()),
+        new("monitor", "panel.section.monitor", "DeveloperBoard", "features",
+            s => new[] { FeatureIds.MonitorCpu, FeatureIds.MonitorMemory, FeatureIds.MonitorDisk, FeatureIds.MonitorNetwork, FeatureIds.MonitorBattery }
+                .Any(s.IsInstalled), () => new MonitorSection()),
     };
 
     /// <summary>Available, not hidden, in the user's order.</summary>

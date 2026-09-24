@@ -6,6 +6,7 @@ using Grip.Core.Energy;
 using Grip.Core.Features;
 using Grip.Core.Input;
 using Grip.Core.Localization;
+using Grip.Core.Monitoring;
 using Grip.Core.Radial;
 using Grip.Core.Search;
 using Grip.Core.Settings;
@@ -618,5 +619,122 @@ public class ShakeDetectorTests
         bool fired = false;
         for (int i = 0; i < 200; i++) fired |= d.Add(i * 16, 100 + i * 3);
         Assert.False(fired);
+    }
+}
+
+public class SampleHistoryTests
+{
+    [Fact]
+    public void ReadsOldestToNewest()
+    {
+        var h = new SampleHistory(3);
+        h.Add(1);
+        h.Add(2);
+        h.Add(3);
+        Assert.Equal(new[] { 1.0, 2.0, 3.0 }, h.Values);
+        Assert.Equal(3, h.Latest);
+    }
+
+    [Fact]
+    public void WrapsAroundPastCapacity()
+    {
+        var h = new SampleHistory(3);
+        h.Add(1);
+        h.Add(2);
+        h.Add(3);
+        h.Add(4); // pushes out 1
+        Assert.Equal(new[] { 2.0, 3.0, 4.0 }, h.Values);
+        Assert.Equal(3, h.Count);
+        Assert.Equal(4, h.Latest);
+        Assert.Equal(4, h.Max);
+    }
+
+    [Fact]
+    public void EmptyHistoryIsZero()
+    {
+        var h = new SampleHistory(5);
+        Assert.Equal(0, h.Latest);
+        Assert.Equal(0, h.Max);
+        Assert.Empty(h.Values);
+    }
+}
+
+public class CpuUsageTests
+{
+    [Fact]
+    public void FullyIdleIsZero()
+    {
+        // 1 second passes, all of it idle.
+        long ticks = TimeSpan.FromSeconds(1).Ticks;
+        Assert.Equal(0, CpuUsage.PercentBetween(0, 0, 0, ticks, ticks, 0), 3);
+    }
+
+    [Fact]
+    public void FullyBusyIsHundred()
+    {
+        long ticks = TimeSpan.FromSeconds(1).Ticks;
+        // No idle time at all; all of it user time (kernel time still includes idle, here zero).
+        Assert.Equal(100, CpuUsage.PercentBetween(0, 0, 0, 0, 0, ticks), 3);
+    }
+
+    [Fact]
+    public void HalfBusyIsFifty()
+    {
+        long ticks = TimeSpan.FromSeconds(1).Ticks;
+        // Half a second idle, half a second of kernel+user work on top of that idle baseline.
+        Assert.Equal(50, CpuUsage.PercentBetween(0, 0, 0, ticks / 2, ticks / 2, ticks / 2), 3);
+    }
+
+    [Fact]
+    public void NoElapsedTimeIsZeroNotNaN()
+    {
+        Assert.Equal(0, CpuUsage.PercentBetween(10, 20, 5, 10, 20, 5));
+    }
+}
+
+public class MonitorWarningsTests
+{
+    [Theory]
+    [InlineData(89, false)]
+    [InlineData(90, true)]
+    [InlineData(100, true)]
+    public void CpuHighAtNinety(double percent, bool expected) => Assert.Equal(expected, MonitorWarnings.IsCpuHigh(percent));
+
+    [Theory]
+    [InlineData(89, false)]
+    [InlineData(90, true)]
+    public void MemoryHighAtNinety(double percent, bool expected) => Assert.Equal(expected, MonitorWarnings.IsMemoryHigh(percent));
+
+    [Theory]
+    [InlineData(6, false)]
+    [InlineData(5, true)]
+    [InlineData(0, true)]
+    public void DiskLowAtFivePercentFree(double freePercent, bool expected) => Assert.Equal(expected, MonitorWarnings.IsDiskLow(freePercent));
+
+    [Fact]
+    public void BatteryLowOnlyWhenNotCharging()
+    {
+        Assert.True(MonitorWarnings.IsBatteryLow(5, charging: false));
+        Assert.False(MonitorWarnings.IsBatteryLow(5, charging: true));
+        Assert.False(MonitorWarnings.IsBatteryLow(50, charging: false));
+    }
+}
+
+public class ByteFormatTests
+{
+    [Theory]
+    [InlineData(0, "0 Б")]
+    [InlineData(512, "512 Б")]
+    [InlineData(1024, "1 КБ")]
+    [InlineData(1536, "1,5 КБ")]
+    [InlineData(1024L * 1024, "1 МБ")]
+    [InlineData(1024L * 1024 * 1024 * 3 + 1024L * 1024 * 471, "3,46 ГБ")]
+    public void FormatsRussianSizes(double bytes, string expected) =>
+        Assert.Equal(expected, ByteFormat.Size(bytes, CultureInfo.GetCultureInfo("ru-RU"), russian: true));
+
+    [Fact]
+    public void FormatsEnglishRate()
+    {
+        Assert.Equal("1.4 MB/s", ByteFormat.Rate(1024 * 1024 * 1.4, CultureInfo.GetCultureInfo("en-US"), russian: false));
     }
 }
