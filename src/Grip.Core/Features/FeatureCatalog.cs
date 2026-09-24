@@ -162,7 +162,7 @@ public static class FeatureCatalog
 
         // Monitor
         new(FeatureIds.MonitorCpu, FeatureGroup.Monitor, FeatureStatus.Ready, "DeveloperBoard", EnergyProfile.Periodic),
-        new(FeatureIds.MonitorGpu, FeatureGroup.Monitor, FeatureStatus.Planned, "Gpu", EnergyProfile.Periodic),
+        new(FeatureIds.MonitorGpu, FeatureGroup.Monitor, FeatureStatus.Ready, "Gpu", EnergyProfile.Periodic),
         new(FeatureIds.MonitorMemory, FeatureGroup.Monitor, FeatureStatus.Ready, "Ram", EnergyProfile.Periodic),
         new(FeatureIds.MonitorDisk, FeatureGroup.Monitor, FeatureStatus.Ready, "HardDrive", EnergyProfile.Periodic),
         new(FeatureIds.MonitorNetwork, FeatureGroup.Monitor, FeatureStatus.Ready, "Globe", EnergyProfile.Periodic),

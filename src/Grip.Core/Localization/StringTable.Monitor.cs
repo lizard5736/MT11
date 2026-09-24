@@ -10,5 +10,6 @@ public static partial class StringTable
         A("monitor.battery.charging", "Заряжается", "Charging");
         A("monitor.battery.onBattery", "От батареи", "On battery");
         A("monitor.battery.none", "Аккумулятор не найден", "No battery found");
+        A("monitor.gpu.unavailable", "Нет данных на этой машине", "No data on this machine");
     }
 }

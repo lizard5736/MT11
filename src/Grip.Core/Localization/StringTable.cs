@@ -242,7 +242,7 @@ public static partial class StringTable
         F("monitorCpu", "Процессор", "Processor",
             "Загрузка процессора с историей.", "Processor load with history.");
         F("monitorGpu", "Видеокарта", "Graphics card",
-            "Загрузка, память и температура видеокарты.", "GPU load, memory and temperature.");
+            "Загрузка видеокарты. Память и температура — в планах.", "GPU load. Memory and temperature are still planned.");
         F("monitorMemory", "Память", "Memory",
             "Занятая память и приложения, которые её едят.", "Memory in use and the apps eating it.");
         F("monitorDisk", "Диски", "Disks",

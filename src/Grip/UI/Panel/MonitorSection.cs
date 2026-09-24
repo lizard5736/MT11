@@ -36,26 +36,40 @@ public sealed class MonitorSection : PanelSection
     private TextBlock? _battValue;
     private TextBlock? _battState;
 
+    private TextBlock? _gpuValue;
+    private TextBlock? _gpuState;
+
+    private static GpuMonitorService Gpu => S.Gpu;
+
     public MonitorSection()
     {
         Content = _stack;
         Monitor.Sampled += OnSampled;
+        Gpu.Sampled += OnGpuSampled;
     }
 
     public override void Refresh()
     {
         Build();
         Monitor.Start();
+        Gpu.Start();
         if (Monitor.Latest is { } snapshot) Render(snapshot);
+        RenderGpu(Gpu.Latest);
     }
 
-    public override void Suspend() => Monitor.Stop();
+    public override void Suspend()
+    {
+        Monitor.Stop();
+        Gpu.Stop();
+    }
 
     private void OnSampled(object? sender, EventArgs e)
     {
         if (Monitor.Latest is not { } snapshot) return;
         Dispatcher.BeginInvoke(() => Render(snapshot));
     }
+
+    private void OnGpuSampled(object? sender, EventArgs e) => Dispatcher.BeginInvoke(() => RenderGpu(Gpu.Latest));
 
     // ---------- building ----------
 
@@ -74,9 +88,12 @@ public sealed class MonitorSection : PanelSection
         _netSession = null;
         _battValue = null;
         _battState = null;
+        _gpuValue = null;
+        _gpuState = null;
 
         var s = S.Settings.Current;
         if (s.IsInstalled(FeatureIds.MonitorCpu)) _stack.Children.Add(BuildCpuCard());
+        if (s.IsInstalled(FeatureIds.MonitorGpu)) _stack.Children.Add(BuildGpuCard());
         if (s.IsInstalled(FeatureIds.MonitorMemory)) _stack.Children.Add(BuildMemoryCard());
         if (s.IsInstalled(FeatureIds.MonitorDisk)) _stack.Children.Add(BuildDiskCard());
         if (s.IsInstalled(FeatureIds.MonitorNetwork)) _stack.Children.Add(BuildNetworkCard());
@@ -137,6 +154,15 @@ public sealed class MonitorSection : PanelSection
         _cpuValue = value;
         _cpuGraph = new Sparkline { Height = 28, Max = 100 };
         body.Children.Add(_cpuGraph);
+        return root;
+    }
+
+    private FrameworkElement BuildGpuCard()
+    {
+        var (root, body, value) = Card("Gpu", L.S("feature.monitorGpu.title"));
+        _gpuValue = value;
+        _gpuState = new TextBlock { Style = (Style)Application.Current.FindResource("Grip.Text.Caption") };
+        body.Children.Add(_gpuState);
         return root;
     }
 
@@ -256,6 +282,22 @@ public sealed class MonitorSection : PanelSection
                 _battValue.Text = "";
                 _battState!.Text = L.S("monitor.battery.none");
             }
+        }
+    }
+
+    private void RenderGpu(double? percent)
+    {
+        if (_gpuValue == null) return;
+        if (percent is { } value)
+        {
+            _gpuValue.Text = $"{Math.Round(value)}%";
+            Warn(_gpuValue, value >= MonitorWarnings.CpuHighPercent);
+            _gpuState!.Text = "";
+        }
+        else
+        {
+            _gpuValue.Text = "";
+            _gpuState!.Text = L.S("monitor.gpu.unavailable");
         }
     }
 

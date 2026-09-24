@@ -81,6 +81,7 @@ public sealed class AppServices : IDisposable
     public RadialController Radial { get; }
     public PanelController Panel { get; } = new();
     public SystemMonitorService Monitor { get; } = new();
+    public GpuMonitorService Gpu { get; } = new();
 
     private ClipboardWindow? _clipboardWindow;
     private CommandBarWindow? _commandBar;
@@ -240,6 +241,7 @@ public sealed class AppServices : IDisposable
     {
         Settings.SaveNow();
         Monitor.Stop();
+        Gpu.Stop();
         KeepAwake.Dispose();
         Clipboard.Dispose();
         Hooks.Dispose();

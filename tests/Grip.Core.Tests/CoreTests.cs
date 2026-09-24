@@ -720,6 +720,43 @@ public class MonitorWarningsTests
     }
 }
 
+public class GpuUsageTests
+{
+    private const string TypicalOutput =
+        "\"(PDH-CSV 4.0) (Coordinated Universal Time)(0)\",\"\\\\HOST\\GPU Engine(pid_1000_luid_0x00000000_0x0000ABCD_phys_0_eng_0_engtype_3D)\\Utilization Percentage\",\"\\\\HOST\\GPU Engine(pid_2000_luid_0x00000000_0x0000ABCD_phys_0_eng_1_engtype_VideoDecode)\\Utilization Percentage\"\r\n" +
+        "\"09/24/2026 14:00:00.000\",\"0.000000\",\"0.000000\"\r\n" +
+        "\"09/24/2026 14:00:01.000\",\"12.500000\",\"3.750000\"\r\n";
+
+    [Fact]
+    public void TakesTheBusiestEngineFromTheLastRow()
+    {
+        Assert.Equal(12.5, GpuUsage.ParsePercent(TypicalOutput));
+    }
+
+    [Fact]
+    public void NoInstancesIsNull()
+    {
+        // No GPU Engine category on this machine: typeperf still prints a lone header/no data.
+        Assert.Null(GpuUsage.ParsePercent("\"(PDH-CSV 4.0) (Coordinated Universal Time)(0)\"\r\n"));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("garbage, not csv at all")]
+    [InlineData("one line only, no header even")]
+    public void UnrecognizedOutputIsNullNotAThrow(string bogus)
+    {
+        Assert.Null(GpuUsage.ParsePercent(bogus));
+    }
+
+    [Fact]
+    public void ClampsAnImplausiblyHighReading()
+    {
+        const string csv = "\"ts\",\"col\"\r\n\"09/24/2026 14:00:00.000\",\"0\"\r\n\"09/24/2026 14:00:01.000\",\"140\"\r\n";
+        Assert.Equal(100, GpuUsage.ParsePercent(csv));
+    }
+}
+
 public class ByteFormatTests
 {
     [Theory]
