@@ -58,4 +58,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: publish/Grip.exe
+          body_path: docs/RELEASE_NOTES.md
           generate_release_notes: true
+          # 0.x is initial development by semver convention: mark it a pre-release until v1.
+          prerelease: ${{ startsWith(github.ref_name, 'v0.') }}
