@@ -10,7 +10,10 @@
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="0" GlassFrameThickness="0,0,0,1" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
-    <Border BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1">
+    <Border x:Name="Root" BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1">
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="RootShift" />
+        </Border.RenderTransform>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />

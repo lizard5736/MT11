@@ -9,6 +9,7 @@ using Grip.Core.Localization;
 using Grip.Core.Text;
 using Grip.Interop;
 using Grip.Services;
+using Grip.UI.Common;
 
 namespace Grip.UI.Shelf;
 
@@ -90,7 +91,7 @@ public partial class ShelfWindow : Window
         Drop += OnDrop;
         PreviewKeyDown += (_, e) =>
         {
-            if (e.Key == Key.Escape) Hide();
+            if (e.Key == Key.Escape) CloseSoft();
         };
         Sync();
     }
@@ -107,7 +108,8 @@ public partial class ShelfWindow : Window
     /// <summary>Shows the shelf without taking focus, at a physical-pixel point.</summary>
     internal void ShowAt(NativeMethods.POINT anchor, bool nearCursor)
     {
-        if (!IsVisible) Show();
+        bool wasHidden = !IsVisible;
+        if (wasHidden) PopupMotion.PrepareEnter(Frame, FrameShift);
         UpdateLayout();
         var area = Screens.FromPoint(anchor);
         var (w, h) = WindowPlacement.PhysicalSize(this);
@@ -126,7 +128,21 @@ public partial class ShelfWindow : Window
         }
         x = Math.Clamp(x, area.Work.Left + margin, area.Work.Right - w - margin);
         y = Math.Clamp(y, area.Work.Top + margin, area.Work.Bottom - h - margin);
+        // Position before Show(): otherwise the first frame paints at whatever spot
+        // Windows' default placement picks (near the screen's top-left) for an instant.
         WindowPlacement.MoveTo(this, x, y);
+        if (wasHidden)
+        {
+            Show();
+            PopupMotion.Enter(Frame, FrameShift);
+        }
+    }
+
+    /// <summary>Fades out and hides — for the user dismissing the shelf, not for dragging its last item out.</summary>
+    private void CloseSoft()
+    {
+        if (!IsVisible) return;
+        PopupMotion.Exit(Frame, FrameShift, Hide);
     }
 
     public void AddFiles(IEnumerable<string> paths)
@@ -192,7 +208,7 @@ public partial class ShelfWindow : Window
         if (result != DragDropEffects.None && !App.Services.Settings.Current.Shelf.KeepItemsAfterDragOut)
         {
             _items.Remove(item);
-            if (_items.Count == 0 && !Pinned) Hide();
+            if (_items.Count == 0 && !Pinned) CloseSoft();
         }
     }
 
@@ -222,7 +238,7 @@ public partial class ShelfWindow : Window
 
     private void OnClear(object sender, RoutedEventArgs e) => _items.Clear();
 
-    private void OnClose(object sender, RoutedEventArgs e) => Hide();
+    private void OnClose(object sender, RoutedEventArgs e) => CloseSoft();
 
     private void OnPin(object sender, RoutedEventArgs e) => Ui.SetIcon(PinToggle, Pinned ? "PinFilled" : "Pin");
 

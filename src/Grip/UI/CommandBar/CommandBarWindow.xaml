@@ -45,7 +45,10 @@
         <local:RowTemplateSelector x:Key="RowSelector" Result="{StaticResource ResultTemplate}" Header="{StaticResource HeaderTemplate}" />
     </Window.Resources>
 
-    <Border BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1">
+    <Border x:Name="Root" BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1">
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="RootShift" />
+        </Border.RenderTransform>
         <StackPanel>
             <DockPanel Margin="18,14,16,12">
                 <c:Icon DockPanel.Dock="Left" Kind="WindowConsole" Size="22" Foreground="{DynamicResource Grip.Accent}" Margin="0,0,8,0" />

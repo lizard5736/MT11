@@ -11,6 +11,9 @@
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="0" GlassFrameThickness="0,0,0,1" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
     <Border x:Name="Frame" BorderBrush="{DynamicResource Grip.Line}" BorderThickness="1">
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="FrameShift" />
+        </Border.RenderTransform>
         <DockPanel>
             <!-- Title bar (drag to move) -->
             <DockPanel x:Name="TitleBar" DockPanel.Dock="Top" Margin="14,10,8,6" Background="Transparent" MouseLeftButtonDown="OnDragWindow">

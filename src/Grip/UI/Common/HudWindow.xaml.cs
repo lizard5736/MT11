@@ -35,18 +35,21 @@ public partial class HudWindow : Window
             _ => "Grip.Accent",
         });
 
-        if (!IsVisible)
+        bool wasHidden = !IsVisible;
+        if (wasHidden)
         {
             Root.Opacity = 0;
             Shift.Y = 8;
-            Show();
         }
         UpdateLayout();
         var area = Screens.FromPoint(Screens.CursorPosition());
         var (w, h) = WindowPlacement.PhysicalSize(this);
         int x = area.Work.Left + (area.Work.Width - w) / 2;
         int y = area.Work.Bottom - h - (int)(56 * area.Scale);
+        // Position before Show(): Root already starts at Opacity 0, but positioning first
+        // too means the hidden-frame trick isn't the only thing standing between us and a flash.
         WindowPlacement.MoveTo(this, x, y);
+        if (wasHidden) Show();
 
         Animate(1, 0, 160);
         _hideTimer.Stop();

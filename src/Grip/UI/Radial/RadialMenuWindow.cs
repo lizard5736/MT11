@@ -68,12 +68,16 @@ public sealed class RadialMenuWindow : Window
         _stack.Push(items);
         _view.SetItems(items, isSubmenu: false, radius);
         _center = at;
-        if (!IsVisible) Show();
+        bool wasHidden = !IsVisible;
+        if (wasHidden) _view.Opacity = 0; // Pop() below fades it in; stay invisible until positioned.
         UpdateLayout();
         var area = Screens.FromPoint(at);
         _scale = area.Scale;
         var (w, h) = WindowPlacement.PhysicalSize(this);
+        // Position before Show(): otherwise the first frame paints at whatever spot
+        // Windows' default placement picks (near the screen's top-left) for an instant.
         WindowPlacement.MoveTo(this, at.X - w / 2, at.Y - h / 2);
+        if (wasHidden) Show();
         if (activate)
         {
             WindowStyling.ForceForeground(this);
@@ -135,7 +139,26 @@ public sealed class RadialMenuWindow : Window
     {
         _tracker.Stop();
         HoldMode = false;
-        if (IsVisible) Hide();
+        // A dismiss (Escape, click on empty hub, focus lost) fades the ring out. Picking
+        // an item hides instantly instead, so the action it triggers isn't held up by a wait.
+        if (dismissed) CloseSoft();
+        else if (IsVisible) Hide();
         if (dismissed) Dismissed?.Invoke();
+    }
+
+    private void CloseSoft()
+    {
+        if (!IsVisible) return;
+        var ease = new CubicEase { EasingMode = EasingMode.EaseIn };
+        var fade = new DoubleAnimation(0, TimeSpan.FromMilliseconds(110)) { EasingFunction = ease };
+        fade.Completed += (_, _) =>
+        {
+            if (_view.Opacity < 0.05) Hide();
+        };
+        _view.BeginAnimation(OpacityProperty, fade);
+        var scale = (ScaleTransform)_view.RenderTransform;
+        var shrink = new DoubleAnimation(0.9, TimeSpan.FromMilliseconds(110)) { EasingFunction = ease };
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, shrink);
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, shrink);
     }
 }

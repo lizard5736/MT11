@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Grip.Interop;
+using Grip.UI.Common;
 
 namespace Grip.UI.CommandBar;
 
@@ -36,7 +37,7 @@ public partial class CommandBarWindow : Window
         };
         Deactivated += (_, _) =>
         {
-            if (!IsPreview) Hide();
+            if (!IsPreview) CloseSoft();
         };
         PreviewKeyDown += OnKey;
         App.Services.AppCatalog.Updated += (_, _) =>
@@ -66,7 +67,7 @@ public partial class CommandBarWindow : Window
     {
         if (IsVisible)
         {
-            Hide();
+            CloseSoft();
             return;
         }
         _engine.Target = NativeMethods.GetForegroundWindow();
@@ -74,11 +75,22 @@ public partial class CommandBarWindow : Window
         App.Services.AppCatalog.Refresh();
         QueryBox.Text = "";
         Search();
-        Show();
+        PopupMotion.PrepareEnter(Root, RootShift);
+        // Position before Show(): otherwise the first frame paints at whatever spot
+        // Windows' default placement picks (near the screen's top-left) for an instant.
         WindowPlacement.PlaceOnMonitor(this, Screens.FromPoint(Screens.CursorPosition()), 0.22);
+        Show();
         WindowStyling.ForceForeground(this);
         Activate();
         QueryBox.Focus();
+        PopupMotion.Enter(Root, RootShift);
+    }
+
+    /// <summary>Fades out and hides — for the user changing their mind, not for running a result.</summary>
+    private void CloseSoft()
+    {
+        if (!IsVisible) return;
+        PopupMotion.Exit(Root, RootShift, Hide);
     }
 
     /// <summary>Preview helper: show results for a query without any window handling.</summary>
@@ -111,7 +123,7 @@ public partial class CommandBarWindow : Window
         {
             case Key.Escape:
                 if (QueryBox.Text.Length > 0) QueryBox.Text = "";
-                else Hide();
+                else CloseSoft();
                 e.Handled = true;
                 break;
             case Key.Down:

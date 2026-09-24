@@ -6,6 +6,7 @@ using System.Windows.Media;
 using Grip.Core.Clipboard;
 using Grip.Core.Settings;
 using Grip.Interop;
+using Grip.UI.Common;
 
 namespace Grip.UI.Clipboard;
 
@@ -34,7 +35,7 @@ public partial class ClipboardWindow : Window
         };
         Deactivated += (_, _) =>
         {
-            if (!IsPreview) Hide();
+            if (!IsPreview) CloseSoft();
         };
         PreviewKeyDown += OnKey;
         App.Services.Clipboard.HistoryChanged += (_, _) =>
@@ -47,7 +48,7 @@ public partial class ClipboardWindow : Window
     {
         if (IsVisible)
         {
-            Hide();
+            CloseSoft();
             return;
         }
         // Never "paste back" into Grip itself.
@@ -59,11 +60,22 @@ public partial class ClipboardWindow : Window
         _filter = ClipFilter.All;
         SyncFilterChips();
         Refresh(keepSelection: false);
-        Show();
+        PopupMotion.PrepareEnter(Root, RootShift);
+        // Position before Show(): otherwise the first frame paints at whatever spot
+        // Windows' default placement picks (near the screen's top-left) for an instant.
         Position();
+        Show();
         WindowStyling.ForceForeground(this);
         Activate();
         SearchBox.Focus();
+        PopupMotion.Enter(Root, RootShift);
+    }
+
+    /// <summary>Fades out and hides — for the user changing their mind, not for picking an entry.</summary>
+    private void CloseSoft()
+    {
+        if (!IsVisible) return;
+        PopupMotion.Exit(Root, RootShift, Hide);
     }
 
     /// <summary>Preview renderer: fills the list without showing the window.</summary>
@@ -178,7 +190,7 @@ public partial class ClipboardWindow : Window
         switch (e.Key)
         {
             case Key.Escape:
-                Hide();
+                CloseSoft();
                 e.Handled = true;
                 break;
             case Key.Down:

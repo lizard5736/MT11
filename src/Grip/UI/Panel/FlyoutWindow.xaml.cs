@@ -7,6 +7,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Grip.Core.Settings;
 using Grip.Interop;
+using Grip.UI.Common;
 
 namespace Grip.UI.Panel;
 
@@ -76,16 +77,15 @@ public partial class FlyoutWindow : Window
     {
         Rebuild();
         UpdateStatus();
-        if (!IsVisible)
-        {
-            Root.Opacity = 0;
-            RootShift.Y = 10;
-            Show();
-        }
+        bool wasHidden = !IsVisible;
+        if (wasHidden) PopupMotion.PrepareEnter(Root, RootShift);
+        // Position before Show(): otherwise the first frame paints at whatever spot
+        // Windows' default placement picks (near the screen's top-left) for an instant.
         Place();
+        if (wasHidden) Show();
         WindowStyling.ForceForeground(this);
         Activate();
-        Animate();
+        if (wasHidden) PopupMotion.Enter(Root, RootShift);
         _statusTimer.Start();
         foreach (var section in VisibleSections()) section.Refresh();
     }
@@ -96,14 +96,7 @@ public partial class FlyoutWindow : Window
         _statusTimer.Stop();
         foreach (var section in _sections.Values) section.Suspend();
         LastHidden = DateTime.UtcNow;
-        Hide();
-    }
-
-    private void Animate()
-    {
-        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-        Root.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(170)) { EasingFunction = ease });
-        RootShift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(200)) { EasingFunction = ease });
+        PopupMotion.Exit(Root, RootShift, Hide);
     }
 
     /// <summary>
