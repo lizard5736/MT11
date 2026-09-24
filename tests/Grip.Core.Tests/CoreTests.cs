@@ -11,6 +11,7 @@ using Grip.Core.Radial;
 using Grip.Core.Search;
 using Grip.Core.Settings;
 using Grip.Core.Text;
+using Grip.Core.Windows;
 
 namespace Grip.Core.Tests;
 
@@ -717,6 +718,70 @@ public class MonitorWarningsTests
         Assert.True(MonitorWarnings.IsBatteryLow(5, charging: false));
         Assert.False(MonitorWarnings.IsBatteryLow(5, charging: true));
         Assert.False(MonitorWarnings.IsBatteryLow(50, charging: false));
+    }
+}
+
+public class WindowZonesTests
+{
+    // A 1921x1081 work area (odd on purpose) at a non-zero origin, to catch off-by-one
+    // and origin-offset mistakes that a clean 1920x1080-at-(0,0) area would hide.
+    private const int X = 100, Y = 50, W = 1921, H = 1081;
+
+    [Fact]
+    public void HalvesMeetExactlyInTheMiddle()
+    {
+        var left = WindowZones.Compute(WindowZone.LeftHalf, X, Y, W, H);
+        var right = WindowZones.Compute(WindowZone.RightHalf, X, Y, W, H);
+        Assert.Equal(left.X + left.Width, right.X); // no gap, no overlap
+        Assert.Equal(W, left.Width + right.Width); // together they cover the whole width
+        Assert.Equal(H, left.Height);
+        Assert.Equal(H, right.Height);
+    }
+
+    [Fact]
+    public void TopAndBottomHalvesMeetExactly()
+    {
+        var top = WindowZones.Compute(WindowZone.TopHalf, X, Y, W, H);
+        var bottom = WindowZones.Compute(WindowZone.BottomHalf, X, Y, W, H);
+        Assert.Equal(top.Y + top.Height, bottom.Y);
+        Assert.Equal(H, top.Height + bottom.Height);
+    }
+
+    [Fact]
+    public void FourQuartersExactlyTileTheArea()
+    {
+        var tl = WindowZones.Compute(WindowZone.TopLeftQuarter, X, Y, W, H);
+        var tr = WindowZones.Compute(WindowZone.TopRightQuarter, X, Y, W, H);
+        var bl = WindowZones.Compute(WindowZone.BottomLeftQuarter, X, Y, W, H);
+        var br = WindowZones.Compute(WindowZone.BottomRightQuarter, X, Y, W, H);
+
+        Assert.Equal(tl.X, bl.X);
+        Assert.Equal(tr.X, br.X);
+        Assert.Equal(tl.Y, tr.Y);
+        Assert.Equal(bl.Y, br.Y);
+        Assert.Equal(tl.X + tl.Width, tr.X);
+        Assert.Equal(tl.Y + tl.Height, bl.Y);
+        Assert.Equal(W, tl.Width + tr.Width);
+        Assert.Equal(H, tl.Height + bl.Height);
+    }
+
+    [Fact]
+    public void MaximizeFillsTheWholeArea()
+    {
+        var rect = WindowZones.Compute(WindowZone.Maximize, X, Y, W, H);
+        Assert.Equal(new ZoneRect(X, Y, W, H), rect);
+    }
+
+    [Fact]
+    public void EveryZoneStaysInsideTheArea()
+    {
+        foreach (var zone in Enum.GetValues<WindowZone>())
+        {
+            var r = WindowZones.Compute(zone, X, Y, W, H);
+            Assert.True(r.X >= X && r.Y >= Y, zone.ToString());
+            Assert.True(r.X + r.Width <= X + W, zone.ToString());
+            Assert.True(r.Y + r.Height <= Y + H, zone.ToString());
+        }
     }
 }
 

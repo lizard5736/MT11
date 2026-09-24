@@ -91,9 +91,13 @@ ICONS = {
     "Info": "info_20_regular",
     "Keyboard": "keyboard_20_regular",
     "KeyboardShift": "keyboard_shift_20_regular",
+    "LayoutQuarters": "layout_cell_four_20_regular",
+    "LayoutSplitLeft": "layout_column_two_split_left_20_regular",
+    "LayoutSplitRight": "layout_column_two_split_right_20_regular",
     "Link": "link_20_regular",
     "List": "list_20_regular",
     "LockClosed": "lock_closed_20_regular",
+    "Maximize": "maximize_20_regular",
     "Mic": "mic_20_regular",
     "MicOff": "mic_off_20_regular",
     "MoreHorizontal": "more_horizontal_20_regular",
@@ -142,6 +146,7 @@ ICONS = {
     "Window": "window_20_regular",
     "WindowConsole": "window_console_20_regular",
     "WindowMultiple": "window_multiple_20_regular",
+    "WindowRestore": "arrow_minimize_20_regular",
     "Wrench": "wrench_screwdriver_20_regular",
 }
 

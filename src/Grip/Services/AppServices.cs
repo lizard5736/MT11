@@ -3,6 +3,7 @@ using Grip.Core.Actions;
 using Grip.Core.Features;
 using Grip.Core.Input;
 using Grip.Core.Settings;
+using Grip.Core.Windows;
 using Grip.Interop;
 using Grip.UI;
 using Grip.UI.Clipboard;
@@ -82,6 +83,7 @@ public sealed class AppServices : IDisposable
     public PanelController Panel { get; } = new();
     public SystemMonitorService Monitor { get; } = new();
     public GpuMonitorService Gpu { get; } = new();
+    public WindowLayoutService WindowLayout { get; } = new();
 
     private ClipboardWindow? _clipboardWindow;
     private CommandBarWindow? _commandBar;
@@ -222,6 +224,14 @@ public sealed class AppServices : IDisposable
             case ActionIds.VolumeUp: InputSender.Tap(InputSender.VK_VOLUME_UP); break;
             case ActionIds.VolumeDown: InputSender.Tap(InputSender.VK_VOLUME_DOWN); break;
             case ActionIds.VolumeMute: InputSender.Tap(InputSender.VK_VOLUME_MUTE); break;
+            case ActionIds.SnapLeft: WindowLayout.Apply(WindowZone.LeftHalf); break;
+            case ActionIds.SnapRight: WindowLayout.Apply(WindowZone.RightHalf); break;
+            case ActionIds.SnapMaximize: WindowLayout.Apply(WindowZone.Maximize); break;
+            case ActionIds.SnapRestore: WindowLayout.RestorePrevious(); break;
+            case ActionIds.SnapTopLeft: WindowLayout.Apply(WindowZone.TopLeftQuarter); break;
+            case ActionIds.SnapTopRight: WindowLayout.Apply(WindowZone.TopRightQuarter); break;
+            case ActionIds.SnapBottomLeft: WindowLayout.Apply(WindowZone.BottomLeftQuarter); break;
+            case ActionIds.SnapBottomRight: WindowLayout.Apply(WindowZone.BottomRightQuarter); break;
             default: Log.Warn("Unknown action " + actionId); break;
         }
     }

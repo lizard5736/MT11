@@ -260,7 +260,8 @@ public static partial class StringTable
         F("windowSwitcher", "Переключатель окон", "Window switcher",
             "Окна с живыми превью, поиском и фильтром по мониторам.", "Windows with live previews, search and a per-monitor filter.");
         F("windowLayout", "Раскладка окон", "Window layout",
-            "Половины, трети, углы и перенос на другой монитор горячими клавишами.", "Halves, thirds, corners and moving to another display with shortcuts.");
+            "Половины, углы и во весь экран — горячими клавишами. Трети и перенос между мониторами — в планах.",
+            "Halves, corners and full screen via shortcuts. Thirds and moving between monitors are still planned.");
         F("closeProtection", "Защита от закрытия", "Close protection",
             "Защищает от случайного Alt+F4, Ctrl+Q и Ctrl+W: удержание или двойное нажатие.",
             "Guards against a stray Alt+F4, Ctrl+Q or Ctrl+W with a hold or double press.");
@@ -344,8 +345,18 @@ public static partial class StringTable
         A("action.media.volumeUp", "Громче", "Volume up");
         A("action.media.volumeDown", "Тише", "Volume down");
         A("action.media.mute", "Без звука", "Mute");
+        A("action.win.snapLeft", "Прижать к левому краю", "Snap left");
+        A("action.win.snapRight", "Прижать к правому краю", "Snap right");
+        A("action.win.snapMaximize", "Развернуть на весь экран", "Maximize");
+        A("action.win.snapRestore", "Вернуть как было", "Restore previous size");
+        A("action.win.snapTopLeft", "В левый верхний угол", "Snap to top-left");
+        A("action.win.snapTopRight", "В правый верхний угол", "Snap to top-right");
+        A("action.win.snapBottomLeft", "В левый нижний угол", "Snap to bottom-left");
+        A("action.win.snapBottomRight", "В правый нижний угол", "Snap to bottom-right");
+
         A("action.category.Grip", "Grip", "Grip");
         A("action.category.System", "Система", "System");
         A("action.category.Media", "Медиа", "Media");
+        A("action.category.Window", "Окна", "Windows");
     }
 }

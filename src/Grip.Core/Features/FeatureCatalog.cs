@@ -173,7 +173,7 @@ public static class FeatureCatalog
 
         // Windows
         new(FeatureIds.WindowSwitcher, FeatureGroup.Windows, FeatureStatus.Planned, "WindowMultiple", EnergyProfile.Keyboard),
-        new(FeatureIds.WindowLayout, FeatureGroup.Windows, FeatureStatus.Planned, "Board", EnergyProfile.Idle),
+        new(FeatureIds.WindowLayout, FeatureGroup.Windows, FeatureStatus.Ready, "Board", EnergyProfile.Idle),
         new(FeatureIds.CloseProtection, FeatureGroup.Windows, FeatureStatus.Planned, "Shield", EnergyProfile.Keyboard),
         new(FeatureIds.QuitOnClose, FeatureGroup.Windows, FeatureStatus.Planned, "Dismiss", EnergyProfile.Events),
 

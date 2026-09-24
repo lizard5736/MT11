@@ -36,9 +36,19 @@ public static class ActionIds
     public const string VolumeUp = "media.volumeUp";
     public const string VolumeDown = "media.volumeDown";
     public const string VolumeMute = "media.mute";
+
+    // Window layout
+    public const string SnapLeft = "win.snapLeft";
+    public const string SnapRight = "win.snapRight";
+    public const string SnapMaximize = "win.snapMaximize";
+    public const string SnapRestore = "win.snapRestore";
+    public const string SnapTopLeft = "win.snapTopLeft";
+    public const string SnapTopRight = "win.snapTopRight";
+    public const string SnapBottomLeft = "win.snapBottomLeft";
+    public const string SnapBottomRight = "win.snapBottomRight";
 }
 
-public enum ActionCategory { Grip, System, Media }
+public enum ActionCategory { Grip, System, Media, Window }
 
 public sealed record ActionInfo(
     string Id,
@@ -79,6 +89,15 @@ public static class ActionCatalog
         new(ActionIds.VolumeUp, ActionCategory.Media, "Speaker", null, CanHaveHotkey: false),
         new(ActionIds.VolumeDown, ActionCategory.Media, "SpeakerLow", null, CanHaveHotkey: false),
         new(ActionIds.VolumeMute, ActionCategory.Media, "SpeakerMute", null, CanHaveHotkey: false),
+
+        new(ActionIds.SnapLeft, ActionCategory.Window, "LayoutSplitLeft", FeatureIds.WindowLayout, "Win+Alt+Left"),
+        new(ActionIds.SnapRight, ActionCategory.Window, "LayoutSplitRight", FeatureIds.WindowLayout, "Win+Alt+Right"),
+        new(ActionIds.SnapMaximize, ActionCategory.Window, "Maximize", FeatureIds.WindowLayout, "Win+Alt+Up"),
+        new(ActionIds.SnapRestore, ActionCategory.Window, "WindowRestore", FeatureIds.WindowLayout, "Win+Alt+Down"),
+        new(ActionIds.SnapTopLeft, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout, "Win+Alt+U"),
+        new(ActionIds.SnapTopRight, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout, "Win+Alt+I"),
+        new(ActionIds.SnapBottomLeft, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout, "Win+Alt+J"),
+        new(ActionIds.SnapBottomRight, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout, "Win+Alt+K"),
     };
 
     private static readonly Dictionary<string, ActionInfo> ById = All.ToDictionary(a => a.Id);

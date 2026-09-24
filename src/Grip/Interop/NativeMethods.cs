@@ -66,6 +66,7 @@ internal static class NativeMethods
     public const int SW_SHOWMINIMIZED = 2;
     public const int SW_SHOW = 5;
     public const int SW_RESTORE = 9;
+    public const int SW_MAXIMIZE = 3;
 
     public const uint GW_OWNER = 4;
     public const uint GA_ROOT = 2;
@@ -133,6 +134,9 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     public static extern bool IsIconic(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool IsZoomed(IntPtr hWnd);
 
     [DllImport("user32.dll")]
     public static extern bool IsWindowVisible(IntPtr hWnd);
