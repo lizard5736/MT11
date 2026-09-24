@@ -766,6 +766,30 @@ public class WindowZonesTests
     }
 
     [Fact]
+    public void ThreeThirdsExactlyTileTheArea()
+    {
+        var left = WindowZones.Compute(WindowZone.LeftThird, X, Y, W, H);
+        var center = WindowZones.Compute(WindowZone.CenterThird, X, Y, W, H);
+        var right = WindowZones.Compute(WindowZone.RightThird, X, Y, W, H);
+        Assert.Equal(left.X + left.Width, center.X);
+        Assert.Equal(center.X + center.Width, right.X);
+        Assert.Equal(W, left.Width + center.Width + right.Width);
+        Assert.Equal(left.Width, center.Width); // only the last third absorbs the rounding remainder
+    }
+
+    [Fact]
+    public void TwoThirdsPairsMatchTheThirds()
+    {
+        var leftThird = WindowZones.Compute(WindowZone.LeftThird, X, Y, W, H);
+        var leftTwoThirds = WindowZones.Compute(WindowZone.LeftTwoThirds, X, Y, W, H);
+        var rightTwoThirds = WindowZones.Compute(WindowZone.RightTwoThirds, X, Y, W, H);
+        Assert.Equal(leftTwoThirds.Width, 2 * leftThird.Width);
+        Assert.Equal(X, leftTwoThirds.X);
+        Assert.Equal(leftThird.X + leftThird.Width, rightTwoThirds.X);
+        Assert.Equal(X + W, rightTwoThirds.X + rightTwoThirds.Width);
+    }
+
+    [Fact]
     public void MaximizeFillsTheWholeArea()
     {
         var rect = WindowZones.Compute(WindowZone.Maximize, X, Y, W, H);

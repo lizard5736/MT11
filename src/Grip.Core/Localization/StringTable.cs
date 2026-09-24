@@ -260,8 +260,8 @@ public static partial class StringTable
         F("windowSwitcher", "Переключатель окон", "Window switcher",
             "Окна с живыми превью, поиском и фильтром по мониторам.", "Windows with live previews, search and a per-monitor filter.");
         F("windowLayout", "Раскладка окон", "Window layout",
-            "Половины, углы и во весь экран — горячими клавишами. Трети и перенос между мониторами — в планах.",
-            "Halves, corners and full screen via shortcuts. Thirds and moving between monitors are still planned.");
+            "Половины, трети, углы и во весь экран — горячими клавишами. Перенос между мониторами уже есть в Windows (Win+Shift+стрелки).",
+            "Halves, thirds, corners and full screen via shortcuts. Moving between monitors is already built into Windows (Win+Shift+arrows).");
         F("closeProtection", "Защита от закрытия", "Close protection",
             "Защищает от случайного Alt+F4, Ctrl+Q и Ctrl+W: удержание или двойное нажатие.",
             "Guards against a stray Alt+F4, Ctrl+Q or Ctrl+W with a hold or double press.");
@@ -353,6 +353,11 @@ public static partial class StringTable
         A("action.win.snapTopRight", "В правый верхний угол", "Snap to top-right");
         A("action.win.snapBottomLeft", "В левый нижний угол", "Snap to bottom-left");
         A("action.win.snapBottomRight", "В правый нижний угол", "Snap to bottom-right");
+        A("action.win.snapLeftThird", "В левую треть", "Snap to left third");
+        A("action.win.snapCenterThird", "В среднюю треть", "Snap to center third");
+        A("action.win.snapRightThird", "В правую треть", "Snap to right third");
+        A("action.win.snapLeftTwoThirds", "На левые две трети", "Snap to left two-thirds");
+        A("action.win.snapRightTwoThirds", "На правые две трети", "Snap to right two-thirds");
 
         A("action.category.Grip", "Grip", "Grip");
         A("action.category.System", "Система", "System");

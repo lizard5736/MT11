@@ -11,6 +11,11 @@ public enum WindowZone
     TopRightQuarter,
     BottomLeftQuarter,
     BottomRightQuarter,
+    LeftThird,
+    CenterThird,
+    RightThird,
+    LeftTwoThirds,
+    RightTwoThirds,
     Maximize,
 }
 
@@ -28,6 +33,8 @@ public static class WindowZones
     {
         int halfW = areaWidth / 2;
         int halfH = areaHeight / 2;
+        int thirdW = areaWidth / 3;
+        int twoThirdsW = thirdW * 2;
         return zone switch
         {
             WindowZone.LeftHalf => new ZoneRect(areaX, areaY, halfW, areaHeight),
@@ -38,6 +45,11 @@ public static class WindowZones
             WindowZone.TopRightQuarter => new ZoneRect(areaX + halfW, areaY, areaWidth - halfW, halfH),
             WindowZone.BottomLeftQuarter => new ZoneRect(areaX, areaY + halfH, halfW, areaHeight - halfH),
             WindowZone.BottomRightQuarter => new ZoneRect(areaX + halfW, areaY + halfH, areaWidth - halfW, areaHeight - halfH),
+            WindowZone.LeftThird => new ZoneRect(areaX, areaY, thirdW, areaHeight),
+            WindowZone.CenterThird => new ZoneRect(areaX + thirdW, areaY, thirdW, areaHeight),
+            WindowZone.RightThird => new ZoneRect(areaX + twoThirdsW, areaY, areaWidth - twoThirdsW, areaHeight),
+            WindowZone.LeftTwoThirds => new ZoneRect(areaX, areaY, twoThirdsW, areaHeight),
+            WindowZone.RightTwoThirds => new ZoneRect(areaX + thirdW, areaY, areaWidth - thirdW, areaHeight),
             WindowZone.Maximize => new ZoneRect(areaX, areaY, areaWidth, areaHeight),
             _ => new ZoneRect(areaX, areaY, areaWidth, areaHeight),
         };
