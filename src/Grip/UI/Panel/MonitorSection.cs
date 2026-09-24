@@ -5,6 +5,8 @@ using Grip.Core.Features;
 using Grip.Core.Localization;
 using Grip.Core.Monitoring;
 using Grip.Services;
+using Grip.UI;
+using Grip.UI.Common;
 using Grip.UI.Controls;
 
 namespace Grip.UI.Panel;
@@ -20,11 +22,13 @@ public sealed class MonitorSection : PanelSection
     private static SystemMonitorService Monitor => S.Monitor;
 
     private TextBlock? _cpuValue;
+    private TextBlock? _cpuName;
     private Sparkline? _cpuGraph;
+    private CoreMeter? _coreMeter;
 
     private TextBlock? _memValue;
     private Sparkline? _memGraph;
-    private TextBlock? _memTop;
+    private StackPanel? _memRows;
 
     private StackPanel? _diskRows;
     private readonly Dictionary<string, (TextBlock Text, Border Fill, ScaleTransform Scale)> _diskByRoot = new();
@@ -37,7 +41,9 @@ public sealed class MonitorSection : PanelSection
     private TextBlock? _battState;
 
     private TextBlock? _gpuValue;
+    private TextBlock? _gpuName;
     private TextBlock? _gpuState;
+    private StackPanel? _gpuRows;
 
     private static GpuMonitorService Gpu => S.Gpu;
 
@@ -77,10 +83,12 @@ public sealed class MonitorSection : PanelSection
     {
         _stack.Children.Clear();
         _cpuValue = null;
+        _cpuName = null;
         _cpuGraph = null;
+        _coreMeter = null;
         _memValue = null;
         _memGraph = null;
-        _memTop = null;
+        _memRows = null;
         _diskRows = null;
         _diskByRoot.Clear();
         _netValue = null;
@@ -89,7 +97,9 @@ public sealed class MonitorSection : PanelSection
         _battValue = null;
         _battState = null;
         _gpuValue = null;
+        _gpuName = null;
         _gpuState = null;
+        _gpuRows = null;
 
         var s = S.Settings.Current;
         if (s.IsInstalled(FeatureIds.MonitorCpu)) _stack.Children.Add(BuildCpuCard());
@@ -148,12 +158,69 @@ public sealed class MonitorSection : PanelSection
         return (root, body, value);
     }
 
+    /// <summary>One process row for the memory/GPU lists: name + detail on the left, a kill button on the right.</summary>
+    private static FrameworkElement ProcessRow(int pid, string name, string detail)
+    {
+        var grid = new Grid { Margin = new Thickness(0, 0, 0, 6) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        var text = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        text.Children.Add(new TextBlock
+        {
+            Text = name,
+            Style = (Style)Application.Current.FindResource("Grip.Text.Secondary"),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+        });
+        text.Children.Add(new TextBlock { Text = detail, Style = (Style)Application.Current.FindResource("Grip.Text.Caption") });
+        grid.Children.Add(text);
+
+        var kill = new Button
+        {
+            Style = (Style)Application.Current.FindResource("Grip.Button.Icon"),
+            Width = 24,
+            Height = 24,
+            Margin = new Thickness(8, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            ToolTip = L.S("monitor.process.kill"),
+        };
+        Ui.SetIcon(kill, "Dismiss");
+        Grid.SetColumn(kill, 1);
+        kill.Click += (_, _) => OnKillProcess(pid, name);
+        grid.Children.Add(kill);
+
+        return grid;
+    }
+
+    private static void OnKillProcess(int pid, string name)
+    {
+        if (!ConfirmDialog.Ask(L.F("monitor.process.kill.confirm", name), okText: L.S("monitor.process.kill"), destructive: true)) return;
+        if (!ProcessControl.TryKill(pid)) S.Hud.Show(L.F("monitor.process.kill.failed", name), "Warning", HudTone.Rec);
+    }
+
+    private static void RenderProcessRows(StackPanel? host, IEnumerable<(int Pid, string Name, string Detail)> rows)
+    {
+        if (host == null) return;
+        host.Children.Clear();
+        foreach (var row in rows) host.Children.Add(ProcessRow(row.Pid, row.Name, row.Detail));
+    }
+
     private FrameworkElement BuildCpuCard()
     {
         var (root, body, value) = Card("DeveloperBoard", L.S("feature.monitorCpu.title"));
         _cpuValue = value;
-        _cpuGraph = new Sparkline { Height = 28, Max = 100 };
+        _cpuName = new TextBlock
+        {
+            Style = (Style)Application.Current.FindResource("Grip.Text.Caption"),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            Text = Monitor.CpuName ?? "",
+            Visibility = Monitor.CpuName == null ? Visibility.Collapsed : Visibility.Visible,
+        };
+        body.Children.Add(_cpuName);
+        _cpuGraph = new Sparkline { Height = 28, Max = 100, Margin = new Thickness(0, 6, 0, 0) };
         body.Children.Add(_cpuGraph);
+        _coreMeter = new CoreMeter { Height = 20, Margin = new Thickness(0, 6, 0, 0) };
+        body.Children.Add(_coreMeter);
         return root;
     }
 
@@ -161,8 +228,18 @@ public sealed class MonitorSection : PanelSection
     {
         var (root, body, value) = Card("Gpu", L.S("feature.monitorGpu.title"));
         _gpuValue = value;
-        _gpuState = new TextBlock { Style = (Style)Application.Current.FindResource("Grip.Text.Caption") };
+        _gpuName = new TextBlock
+        {
+            Style = (Style)Application.Current.FindResource("Grip.Text.Caption"),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            Text = Gpu.GpuName ?? "",
+            Visibility = Gpu.GpuName == null ? Visibility.Collapsed : Visibility.Visible,
+        };
+        body.Children.Add(_gpuName);
+        _gpuState = new TextBlock { Style = (Style)Application.Current.FindResource("Grip.Text.Caption"), Margin = new Thickness(0, 4, 0, 0) };
         body.Children.Add(_gpuState);
+        _gpuRows = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
+        body.Children.Add(_gpuRows);
         return root;
     }
 
@@ -172,8 +249,8 @@ public sealed class MonitorSection : PanelSection
         _memValue = value;
         _memGraph = new Sparkline { Height = 28, Max = 100 };
         body.Children.Add(_memGraph);
-        _memTop = new TextBlock { Style = (Style)Application.Current.FindResource("Grip.Text.Caption"), Margin = new Thickness(0, 6, 0, 0) };
-        body.Children.Add(_memTop);
+        _memRows = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
+        body.Children.Add(_memRows);
         return root;
     }
 
@@ -244,6 +321,7 @@ public sealed class MonitorSection : PanelSection
             _cpuValue.Text = $"{Math.Round(snapshot.CpuPercent)}%";
             Warn(_cpuValue, MonitorWarnings.IsCpuHigh(snapshot.CpuPercent));
             _cpuGraph!.SetValues(Monitor.CpuHistory.Values);
+            _coreMeter?.SetValues(snapshot.CpuCorePercents);
         }
 
         if (_memValue != null)
@@ -251,8 +329,8 @@ public sealed class MonitorSection : PanelSection
             _memValue.Text = $"{ByteFormat.Size(snapshot.MemoryUsedBytes, culture, ru)} / {ByteFormat.Size(snapshot.MemoryTotalBytes, culture, ru)}";
             Warn(_memValue, MonitorWarnings.IsMemoryHigh(snapshot.MemoryUsedPercent));
             _memGraph!.SetValues(Monitor.MemoryHistory.Values);
-            var top = snapshot.TopProcesses.Take(2).Select(p => $"{p.Name} — {ByteFormat.Size(p.WorkingSetBytes, culture, ru)}");
-            _memTop!.Text = snapshot.TopProcesses.Count == 0 ? "" : L.F("monitor.memory.top", string.Join(", ", top));
+            RenderProcessRows(_memRows, snapshot.TopProcesses.Take(5)
+                .Select(p => (p.ProcessId, p.Name, ByteFormat.Size(p.WorkingSetBytes, culture, ru))));
         }
 
         if (_diskRows != null) RenderDisks(_diskRows, snapshot.Drives, culture, ru);
@@ -288,6 +366,13 @@ public sealed class MonitorSection : PanelSection
     private void RenderGpu(double? percent)
     {
         if (_gpuValue == null) return;
+
+        if (_gpuName != null)
+        {
+            _gpuName.Text = Gpu.GpuName ?? "";
+            _gpuName.Visibility = Gpu.GpuName == null ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         if (percent is { } value)
         {
             _gpuValue.Text = $"{Math.Round(value)}%";
@@ -299,6 +384,8 @@ public sealed class MonitorSection : PanelSection
             _gpuValue.Text = "";
             _gpuState!.Text = L.S("monitor.gpu.unavailable");
         }
+
+        RenderProcessRows(_gpuRows, Gpu.TopProcesses.Take(3).Select(p => (p.ProcessId, p.Name, $"{Math.Round(p.Percent)}%")));
     }
 
     private void RenderDisks(StackPanel diskRows, IReadOnlyList<DriveSample> drives, System.Globalization.CultureInfo culture, bool ru)

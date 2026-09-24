@@ -844,6 +844,42 @@ public class GpuUsageTests
         const string csv = "\"ts\",\"col\"\r\n\"09/24/2026 14:00:00.000\",\"0\"\r\n\"09/24/2026 14:00:01.000\",\"140\"\r\n";
         Assert.Equal(100, GpuUsage.ParsePercent(csv));
     }
+
+    [Fact]
+    public void ByProcessGroupsOneRowPerPid()
+    {
+        var byProcess = GpuUsage.ParseByProcess(TypicalOutput);
+        Assert.Equal(2, byProcess.Count);
+        Assert.Equal(1000, byProcess[0].ProcessId); // busiest first
+        Assert.Equal(12.5, byProcess[0].Percent);
+        Assert.Equal(2000, byProcess[1].ProcessId);
+        Assert.Equal(3.75, byProcess[1].Percent);
+    }
+
+    [Fact]
+    public void ByProcessSumsMultipleEnginesOfTheSameProcess()
+    {
+        const string csv =
+            "\"ts\",\"\\\\H\\GPU Engine(pid_500_luid_0x0_0x1_phys_0_eng_0_engtype_3D)\\Utilization Percentage\"," +
+            "\"\\\\H\\GPU Engine(pid_500_luid_0x0_0x1_phys_0_eng_1_engtype_Copy)\\Utilization Percentage\"\r\n" +
+            "\"t0\",\"0\",\"0\"\r\n\"t1\",\"20\",\"5\"\r\n";
+        var byProcess = GpuUsage.ParseByProcess(csv);
+        Assert.Equal(new GpuProcessUsage(500, 25), Assert.Single(byProcess));
+    }
+
+    [Fact]
+    public void ByProcessIgnoresInstancesWithoutAPid()
+    {
+        // A total/_Total-style instance, or anything else the pid_ pattern doesn't match.
+        const string csv = "\"ts\",\"\\\\H\\GPU Engine(_Total)\\Utilization Percentage\"\r\n\"t0\",\"0\"\r\n\"t1\",\"50\"\r\n";
+        Assert.Empty(GpuUsage.ParseByProcess(csv));
+    }
+
+    [Fact]
+    public void ByProcessOnUnrecognizedOutputIsEmptyNotAThrow()
+    {
+        Assert.Empty(GpuUsage.ParseByProcess(""));
+    }
 }
 
 public class ByteFormatTests

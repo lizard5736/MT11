@@ -2,9 +2,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using Grip.Core.Monitoring;
 using Grip.Interop;
+using Microsoft.Win32;
 
 namespace Grip.Services;
 
@@ -13,10 +16,11 @@ public sealed record DriveSample(string Root, string Label, long FreeBytes, long
     public double UsedPercent => TotalBytes <= 0 ? 0 : (TotalBytes - FreeBytes) * 100.0 / TotalBytes;
 }
 
-public sealed record ProcessSample(string Name, long WorkingSetBytes);
+public sealed record ProcessSample(int ProcessId, string Name, long WorkingSetBytes);
 
 public sealed record MonitorSnapshot(
     double CpuPercent,
+    IReadOnlyList<double> CpuCorePercents,
     long MemoryUsedBytes,
     long MemoryTotalBytes,
     IReadOnlyList<DriveSample> Drives,
@@ -38,11 +42,14 @@ public sealed record MonitorSnapshot(
 /// started: the Monitor panel section starts it when shown and stops it
 /// when the panel closes, same as the panel's own status clock.
 ///
-/// Everything here reads from stable, well-documented, unprivileged Win32
-/// and .NET APIs (GetSystemTimes, GlobalMemoryStatusEx, GetSystemPowerStatus,
-/// DriveInfo, NetworkInterface, Process) — nothing needs administrator
-/// rights or a driver. GPU load and real CPU temperature are not: they need
-/// either a vendor SDK or the PawnIO driver, and stay on the roadmap.
+/// Everything here reads from stable, unprivileged Win32/.NET APIs —
+/// nothing needs administrator rights or a driver. GetSystemTimes,
+/// GlobalMemoryStatusEx, GetSystemPowerStatus, DriveInfo, NetworkInterface
+/// and Process are documented; NtQuerySystemInformation (per-core load) is
+/// not, but it is the same call Task Manager and every serious Windows
+/// monitoring tool uses for exactly this, has been stable for decades, and
+/// marshals as a plain fixed-size struct array — none of the variable-length
+/// buffer risk that keeps GPU load on typeperf instead of raw PDH.
 /// </summary>
 public sealed class SystemMonitorService
 {
@@ -51,6 +58,7 @@ public sealed class SystemMonitorService
 
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(1500) };
     private long _prevIdle, _prevKernel, _prevUser;
+    private NativeMethods.SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION[]? _prevCores;
     private long _prevBytesSent, _prevBytesReceived;
     private long _sessionBaselineSent = -1, _sessionBaselineReceived = -1;
     private DateTime _prevSampleTime;
@@ -60,6 +68,9 @@ public sealed class SystemMonitorService
     public SampleHistory CpuHistory { get; } = new(HistoryLength);
     public SampleHistory MemoryHistory { get; } = new(HistoryLength);
     public SampleHistory NetworkHistory { get; } = new(HistoryLength);
+
+    /// <summary>e.g. "12th Gen Intel(R) Core(TM) i7-12700K". Null if the registry value is missing.</summary>
+    public string? CpuName { get; } = ReadCpuName();
 
     public bool IsRunning { get; private set; }
 
@@ -78,6 +89,7 @@ public sealed class SystemMonitorService
         _prevIdle = idle.Ticks;
         _prevKernel = kernel.Ticks;
         _prevUser = user.Ticks;
+        _prevCores = null; // first per-core sample after (re)starting reports 0s rather than a baseline-less spike
         (_prevBytesSent, _prevBytesReceived) = NetworkTotals();
         if (_sessionBaselineSent < 0)
         {
@@ -118,6 +130,7 @@ public sealed class SystemMonitorService
         _prevKernel = kernel.Ticks;
         _prevUser = user.Ticks;
         CpuHistory.Add(cpu);
+        var corePercents = SampleCorePercents();
 
         var mem = NativeMethods.MEMORYSTATUSEX.Create();
         long memUsed = 0, memTotal = 0;
@@ -164,9 +177,46 @@ public sealed class SystemMonitorService
         _tick++;
         if (_tick % ProcessSampleEveryNTicks == 0 || _lastTopProcesses.Count == 0) _lastTopProcesses = TopProcesses();
 
-        Latest = new MonitorSnapshot(cpu, memUsed, memTotal, drives, up, down, sessionSent, sessionReceived,
+        Latest = new MonitorSnapshot(cpu, corePercents, memUsed, memTotal, drives, up, down, sessionSent, sessionReceived,
             LocalIPv4(), hasBattery, batteryPercent, charging, _lastTopProcesses);
         Sampled?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>One load percent per logical core. Empty if the query fails — a monitor tile
+    /// with no per-core row is a much smaller problem than a crash from a bad NT call.</summary>
+    private double[] SampleCorePercents()
+    {
+        int count = Environment.ProcessorCount;
+        var cores = new NativeMethods.SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION[count];
+        int size = Marshal.SizeOf<NativeMethods.SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION>() * count;
+        int status = NativeMethods.NtQuerySystemInformation(NativeMethods.SystemProcessorPerformanceInformation, cores, size, out _);
+        if (status != 0)
+        {
+            _prevCores = null;
+            return Array.Empty<double>();
+        }
+
+        var percents = new double[count];
+        if (_prevCores != null && _prevCores.Length == count)
+        {
+            for (int i = 0; i < count; i++)
+                percents[i] = CpuUsage.PercentBetween(
+                    _prevCores[i].IdleTime, _prevCores[i].KernelTime, _prevCores[i].UserTime,
+                    cores[i].IdleTime, cores[i].KernelTime, cores[i].UserTime);
+        }
+        _prevCores = cores;
+        return percents;
+    }
+
+    private static string? ReadCpuName()
+    {
+        try
+        {
+            using var key = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0");
+            var name = key?.GetValue("ProcessorNameString") as string;
+            return string.IsNullOrWhiteSpace(name) ? null : Regex.Replace(name.Trim(), @"\s+", " ");
+        }
+        catch (System.Security.SecurityException) { return null; }
     }
 
     private static List<ProcessSample> TopProcesses()
@@ -176,12 +226,12 @@ public sealed class SystemMonitorService
         {
             using (process)
             {
-                try { result.Add(new ProcessSample(process.ProcessName, process.WorkingSet64)); }
+                try { result.Add(new ProcessSample(process.Id, process.ProcessName, process.WorkingSet64)); }
                 catch (System.ComponentModel.Win32Exception) { }
                 catch (InvalidOperationException) { }
             }
         }
-        return result.OrderByDescending(p => p.WorkingSetBytes).Take(5).ToList();
+        return result.OrderByDescending(p => p.WorkingSetBytes).Take(8).ToList();
     }
 
     /// <summary>Every call here is wrapped: an odd adapter, a VPN's virtual NIC or (as under Wine)

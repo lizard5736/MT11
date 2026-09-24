@@ -400,6 +400,28 @@ internal static class NativeMethods
     [DllImport("shcore.dll")]
     public static extern int GetDpiForMonitor(IntPtr hmonitor, int dpiType, out uint dpiX, out uint dpiY);
 
+    // ---------- ntdll ----------
+    /// <summary>Undocumented, but stable and widely relied on (Task Manager, Process Hacker/System
+    /// Informer, every third-party monitor) for exactly this: per-core idle/kernel/user time. There is
+    /// no documented public alternative — the performance-counter equivalent ("\Processor(N)\...")
+    /// has the same localized-name problem GPU Engine had, for every single core.</summary>
+    [DllImport("ntdll.dll")]
+    public static extern int NtQuerySystemInformation(int systemInformationClass,
+        [Out] SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION[] systemInformation, int systemInformationLength, out int returnLength);
+
+    public const int SystemProcessorPerformanceInformation = 8;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION
+    {
+        public long IdleTime;
+        public long KernelTime;
+        public long UserTime;
+        private readonly long _reserved1;
+        private readonly long _reserved2;
+        private readonly uint _reserved3;
+    }
+
     // ---------- powrprof ----------
     [DllImport("powrprof.dll")]
     public static extern uint PowerGetActiveScheme(IntPtr userRootPowerKey, out IntPtr activePolicyGuid);
