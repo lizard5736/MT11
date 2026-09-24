@@ -6,7 +6,7 @@
     <Company>Grip</Company>
     <Product>Grip</Product>
     <Copyright>© 2026 Grip</Copyright>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <!-- Lets the Windows-only projects build on Linux/macOS CI too. -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
