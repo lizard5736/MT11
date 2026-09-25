@@ -259,7 +259,8 @@ public static partial class StringTable
             "Загрузка процессора во всплывающей подсказке над значком — наведи курсор, без клика.",
             "CPU load in the tray icon's hover tooltip — no click needed.");
         F("monitorAlerts", "Предупреждения", "Alerts",
-            "Уведомления о нагрузке, перегреве, нехватке памяти и места.", "Alerts for load, heat, low memory and low disk space.");
+            "Всплывающее уведомление при высокой нагрузке на процессор, видеокарту или память, разряженной батарее и нехватке места на диске.",
+            "A pop-up notice for high CPU, GPU or memory load, low battery and low disk space.");
         F("windowSwitcher", "Переключатель окон", "Window switcher",
             "Окна с живыми превью, поиском и фильтром по мониторам.", "Windows with live previews, search and a per-monitor filter.");
         F("windowLayout", "Раскладка окон", "Window layout",

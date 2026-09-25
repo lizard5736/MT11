@@ -87,6 +87,7 @@ public sealed class AppServices : IDisposable
     public WindowLayoutService WindowLayout { get; } = new();
     public NotepadService Notepad { get; } = new();
     public TrayReadoutService TrayReadouts { get; } = new();
+    public MonitorAlertService Alerts { get; }
 
     private ClipboardWindow? _clipboardWindow;
     private CommandBarWindow? _commandBar;
@@ -109,6 +110,7 @@ public sealed class AppServices : IDisposable
         Hooks = new InputHookService();
         Shelf = new ShelfController(Settings, Hooks);
         Radial = new RadialController(Settings, Hooks);
+        Alerts = new MonitorAlertService(Monitor, Gpu, Hud);
 
         LanguageService.Apply(Settings.Current.General.Language);
         Theme.Apply(Settings.Current.General.Theme);
@@ -160,6 +162,7 @@ public sealed class AppServices : IDisposable
             Radial.ApplySettings();
             if (!s.IsInstalled(FeatureIds.KeepAwake) && KeepAwake.IsActive) KeepAwake.Stop();
             if (s.IsInstalled(FeatureIds.TrayReadouts)) TrayReadouts.Start(); else TrayReadouts.Stop();
+            if (s.IsInstalled(FeatureIds.MonitorAlerts)) Alerts.Start(); else Alerts.Stop();
             UpdateTray();
         }
         finally
@@ -276,6 +279,7 @@ public sealed class AppServices : IDisposable
         Settings.SaveNow();
         Notepad.Dispose();
         TrayReadouts.Stop();
+        Alerts.Stop();
         Monitor.Stop();
         Gpu.Stop();
         KeepAwake.Dispose();

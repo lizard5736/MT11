@@ -169,7 +169,7 @@ public static class FeatureCatalog
         new(FeatureIds.MonitorBattery, FeatureGroup.Monitor, FeatureStatus.Ready, "Battery", EnergyProfile.Periodic),
         new(FeatureIds.CpuTemperature, FeatureGroup.Monitor, FeatureStatus.Planned, "Temperature", EnergyProfile.Periodic),
         new(FeatureIds.TrayReadouts, FeatureGroup.Monitor, FeatureStatus.Ready, "DataPie", EnergyProfile.Periodic),
-        new(FeatureIds.MonitorAlerts, FeatureGroup.Monitor, FeatureStatus.Planned, "Alert", EnergyProfile.Periodic),
+        new(FeatureIds.MonitorAlerts, FeatureGroup.Monitor, FeatureStatus.Ready, "Alert", EnergyProfile.Periodic),
 
         // Windows
         new(FeatureIds.WindowSwitcher, FeatureGroup.Windows, FeatureStatus.Planned, "WindowMultiple", EnergyProfile.Keyboard),

@@ -13,5 +13,10 @@ public static partial class StringTable
         A("monitor.process.kill", "Завершить процесс", "End process");
         A("monitor.process.kill.confirm", "Завершить процесс «{0}»?", "End process “{0}”?");
         A("monitor.process.kill.failed", "Не удалось завершить «{0}»", "Couldn't end “{0}”");
+        A("monitor.alert.cpu", "Процессор загружен на {0}%", "CPU load at {0}%");
+        A("monitor.alert.memory", "Память заполнена на {0}%", "Memory at {0}%");
+        A("monitor.alert.gpu", "Видеокарта загружена на {0}%", "GPU load at {0}%");
+        A("monitor.alert.battery", "Батарея разряжена: {0}%", "Battery low: {0}%");
+        A("monitor.alert.disk", "Диск «{0}» почти заполнен", "Disk “{0}” is almost full");
     }
 }

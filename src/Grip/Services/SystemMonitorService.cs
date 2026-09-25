@@ -64,6 +64,7 @@ public sealed class SystemMonitorService
     private DateTime _prevSampleTime;
     private IReadOnlyList<ProcessSample> _lastTopProcesses = Array.Empty<ProcessSample>();
     private int _tick;
+    private readonly HashSet<string> _keepAliveOwners = new();
 
     public SampleHistory CpuHistory { get; } = new(HistoryLength);
     public SampleHistory MemoryHistory { get; } = new(HistoryLength);
@@ -81,8 +82,14 @@ public sealed class SystemMonitorService
 
     public SystemMonitorService() => _timer.Tick += (_, _) => Sample();
 
-    public void Start()
+    /// <summary>
+    /// Starts sampling, or does nothing if already running. <paramref name="owner"/> tracks
+    /// who wants this running — the Monitor panel section and the alerts feature can both
+    /// hold it open independently, so a Stop() from one never cuts off the other.
+    /// </summary>
+    public void Start(string owner = "panel")
     {
+        _keepAliveOwners.Add(owner);
         if (IsRunning) return;
         IsRunning = true;
         NativeMethods.GetSystemTimes(out var idle, out var kernel, out var user);
@@ -102,8 +109,10 @@ public sealed class SystemMonitorService
         _timer.Start();
     }
 
-    public void Stop()
+    public void Stop(string owner = "panel")
     {
+        _keepAliveOwners.Remove(owner);
+        if (_keepAliveOwners.Count > 0) return;
         IsRunning = false;
         _timer.Stop();
     }

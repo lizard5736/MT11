@@ -32,6 +32,7 @@ public sealed class GpuMonitorService
     private double? _percent;
     private IReadOnlyList<GpuProcessInfo> _topProcesses = Array.Empty<GpuProcessInfo>();
     private CancellationTokenSource? _cts;
+    private readonly HashSet<string> _keepAliveOwners = new();
 
     public bool IsRunning => _cts != null;
 
@@ -65,15 +66,19 @@ public sealed class GpuMonitorService
         });
     }
 
-    public void Start()
+    /// <summary><paramref name="owner"/> tracks who wants this running — see SystemMonitorService.Start.</summary>
+    public void Start(string owner = "panel")
     {
+        _keepAliveOwners.Add(owner);
         if (_cts != null) return;
         _cts = new CancellationTokenSource();
         _ = RunAsync(_cts.Token);
     }
 
-    public void Stop()
+    public void Stop(string owner = "panel")
     {
+        _keepAliveOwners.Remove(owner);
+        if (_keepAliveOwners.Count > 0) return;
         _cts?.Cancel();
         _cts = null;
     }
