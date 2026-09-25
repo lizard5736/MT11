@@ -16,6 +16,12 @@ public enum WindowZone
     RightThird,
     LeftTwoThirds,
     RightTwoThirds,
+    TopLeftSixth,
+    TopCenterSixth,
+    TopRightSixth,
+    BottomLeftSixth,
+    BottomCenterSixth,
+    BottomRightSixth,
     Maximize,
 }
 
@@ -50,6 +56,12 @@ public static class WindowZones
             WindowZone.RightThird => new ZoneRect(areaX + twoThirdsW, areaY, areaWidth - twoThirdsW, areaHeight),
             WindowZone.LeftTwoThirds => new ZoneRect(areaX, areaY, twoThirdsW, areaHeight),
             WindowZone.RightTwoThirds => new ZoneRect(areaX + thirdW, areaY, areaWidth - thirdW, areaHeight),
+            WindowZone.TopLeftSixth => new ZoneRect(areaX, areaY, thirdW, halfH),
+            WindowZone.TopCenterSixth => new ZoneRect(areaX + thirdW, areaY, thirdW, halfH),
+            WindowZone.TopRightSixth => new ZoneRect(areaX + twoThirdsW, areaY, areaWidth - twoThirdsW, halfH),
+            WindowZone.BottomLeftSixth => new ZoneRect(areaX, areaY + halfH, thirdW, areaHeight - halfH),
+            WindowZone.BottomCenterSixth => new ZoneRect(areaX + thirdW, areaY + halfH, thirdW, areaHeight - halfH),
+            WindowZone.BottomRightSixth => new ZoneRect(areaX + twoThirdsW, areaY + halfH, areaWidth - twoThirdsW, areaHeight - halfH),
             WindowZone.Maximize => new ZoneRect(areaX, areaY, areaWidth, areaHeight),
             _ => new ZoneRect(areaX, areaY, areaWidth, areaHeight),
         };

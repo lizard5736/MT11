@@ -791,6 +791,34 @@ public class WindowZonesTests
     }
 
     [Fact]
+    public void SixSixthsExactlyTileTheArea()
+    {
+        var tl = WindowZones.Compute(WindowZone.TopLeftSixth, X, Y, W, H);
+        var tc = WindowZones.Compute(WindowZone.TopCenterSixth, X, Y, W, H);
+        var tr = WindowZones.Compute(WindowZone.TopRightSixth, X, Y, W, H);
+        var bl = WindowZones.Compute(WindowZone.BottomLeftSixth, X, Y, W, H);
+        var bc = WindowZones.Compute(WindowZone.BottomCenterSixth, X, Y, W, H);
+        var br = WindowZones.Compute(WindowZone.BottomRightSixth, X, Y, W, H);
+
+        // Top row tiles the width exactly, and the bottom row lines up under it.
+        Assert.Equal(tl.X + tl.Width, tc.X);
+        Assert.Equal(tc.X + tc.Width, tr.X);
+        Assert.Equal(W, tl.Width + tc.Width + tr.Width);
+        Assert.Equal(tl.X, bl.X);
+        Assert.Equal(tc.X, bc.X);
+        Assert.Equal(tr.X, br.X);
+        Assert.Equal(tl.Width, bl.Width);
+
+        // The two rows meet exactly and together cover the full height.
+        Assert.Equal(tl.Y + tl.Height, bl.Y);
+        Assert.Equal(H, tl.Height + bl.Height);
+        Assert.Equal(tl.Height, tc.Height);
+        Assert.Equal(tl.Height, tr.Height);
+        Assert.Equal(bl.Height, bc.Height);
+        Assert.Equal(bl.Height, br.Height);
+    }
+
+    [Fact]
     public void MaximizeFillsTheWholeArea()
     {
         var rect = WindowZones.Compute(WindowZone.Maximize, X, Y, W, H);

@@ -244,6 +244,12 @@ public sealed class AppServices : IDisposable
             case ActionIds.SnapRightThird: WindowLayout.Apply(WindowZone.RightThird); break;
             case ActionIds.SnapLeftTwoThirds: WindowLayout.Apply(WindowZone.LeftTwoThirds); break;
             case ActionIds.SnapRightTwoThirds: WindowLayout.Apply(WindowZone.RightTwoThirds); break;
+            case ActionIds.SnapTopLeftSixth: WindowLayout.Apply(WindowZone.TopLeftSixth); break;
+            case ActionIds.SnapTopCenterSixth: WindowLayout.Apply(WindowZone.TopCenterSixth); break;
+            case ActionIds.SnapTopRightSixth: WindowLayout.Apply(WindowZone.TopRightSixth); break;
+            case ActionIds.SnapBottomLeftSixth: WindowLayout.Apply(WindowZone.BottomLeftSixth); break;
+            case ActionIds.SnapBottomCenterSixth: WindowLayout.Apply(WindowZone.BottomCenterSixth); break;
+            case ActionIds.SnapBottomRightSixth: WindowLayout.Apply(WindowZone.BottomRightSixth); break;
             default: Log.Warn("Unknown action " + actionId); break;
         }
     }

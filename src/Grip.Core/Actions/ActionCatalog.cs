@@ -52,6 +52,12 @@ public static class ActionIds
     public const string SnapRightThird = "win.snapRightThird";
     public const string SnapLeftTwoThirds = "win.snapLeftTwoThirds";
     public const string SnapRightTwoThirds = "win.snapRightTwoThirds";
+    public const string SnapTopLeftSixth = "win.snapTopLeftSixth";
+    public const string SnapTopCenterSixth = "win.snapTopCenterSixth";
+    public const string SnapTopRightSixth = "win.snapTopRightSixth";
+    public const string SnapBottomLeftSixth = "win.snapBottomLeftSixth";
+    public const string SnapBottomCenterSixth = "win.snapBottomCenterSixth";
+    public const string SnapBottomRightSixth = "win.snapBottomRightSixth";
 }
 
 public enum ActionCategory { Grip, System, Media, Window }
@@ -110,6 +116,12 @@ public static class ActionCatalog
         new(ActionIds.SnapCenterThird, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout),
         new(ActionIds.SnapLeftTwoThirds, ActionCategory.Window, "LayoutSplitLeft", FeatureIds.WindowLayout),
         new(ActionIds.SnapRightTwoThirds, ActionCategory.Window, "LayoutSplitRight", FeatureIds.WindowLayout),
+        new(ActionIds.SnapTopLeftSixth, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout),
+        new(ActionIds.SnapTopCenterSixth, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout),
+        new(ActionIds.SnapTopRightSixth, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout),
+        new(ActionIds.SnapBottomLeftSixth, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout),
+        new(ActionIds.SnapBottomCenterSixth, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout),
+        new(ActionIds.SnapBottomRightSixth, ActionCategory.Window, "LayoutQuarters", FeatureIds.WindowLayout),
     };
 
     private static readonly Dictionary<string, ActionInfo> ById = All.ToDictionary(a => a.Id);

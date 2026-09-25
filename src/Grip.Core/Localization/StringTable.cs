@@ -360,6 +360,12 @@ public static partial class StringTable
         A("action.win.snapRightThird", "В правую треть", "Snap to right third");
         A("action.win.snapLeftTwoThirds", "На левые две трети", "Snap to left two-thirds");
         A("action.win.snapRightTwoThirds", "На правые две трети", "Snap to right two-thirds");
+        A("action.win.snapTopLeftSixth", "В верхнюю левую шестую", "Snap to top-left sixth");
+        A("action.win.snapTopCenterSixth", "В верхнюю среднюю шестую", "Snap to top-center sixth");
+        A("action.win.snapTopRightSixth", "В верхнюю правую шестую", "Snap to top-right sixth");
+        A("action.win.snapBottomLeftSixth", "В нижнюю левую шестую", "Snap to bottom-left sixth");
+        A("action.win.snapBottomCenterSixth", "В нижнюю среднюю шестую", "Snap to bottom-center sixth");
+        A("action.win.snapBottomRightSixth", "В нижнюю правую шестую", "Snap to bottom-right sixth");
 
         A("action.category.Grip", "Grip", "Grip");
         A("action.category.System", "Система", "System");
