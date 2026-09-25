@@ -18,7 +18,7 @@ public sealed class MonitorAlertService
     private readonly GpuMonitorService _gpu;
     private readonly HudService _hud;
     private readonly HashSet<string> _disksLow = new();
-    private bool _cpuWasHigh, _memoryWasHigh, _batteryWasLow, _gpuWasHigh, _gpuWasHot;
+    private bool _cpuWasHigh, _cpuWasHot, _memoryWasHigh, _batteryWasLow, _gpuWasHigh, _gpuWasHot;
 
     public bool IsRunning { get; private set; }
 
@@ -57,6 +57,7 @@ public sealed class MonitorAlertService
     private void SyncBaseline(MonitorSnapshot snapshot)
     {
         _cpuWasHigh = MonitorWarnings.IsCpuHigh(snapshot.CpuPercent);
+        _cpuWasHot = snapshot.CpuTemperatureCelsius is { } temp && MonitorWarnings.IsCpuTemperatureHigh(temp);
         _memoryWasHigh = MonitorWarnings.IsMemoryHigh(snapshot.MemoryUsedPercent);
         _batteryWasLow = snapshot.HasBattery && MonitorWarnings.IsBatteryLow(snapshot.BatteryPercent, snapshot.BatteryCharging);
         _disksLow.Clear();
@@ -71,6 +72,10 @@ public sealed class MonitorAlertService
         bool cpuHigh = MonitorWarnings.IsCpuHigh(snapshot.CpuPercent);
         if (cpuHigh && !_cpuWasHigh) Alert(L.F("monitor.alert.cpu", Math.Round(snapshot.CpuPercent)));
         _cpuWasHigh = cpuHigh;
+
+        bool cpuHot = snapshot.CpuTemperatureCelsius is { } cpuTemp && MonitorWarnings.IsCpuTemperatureHigh(cpuTemp);
+        if (cpuHot && !_cpuWasHot) Alert(L.F("monitor.alert.cpuTemperature", Math.Round(snapshot.CpuTemperatureCelsius!.Value)));
+        _cpuWasHot = cpuHot;
 
         bool memoryHigh = MonitorWarnings.IsMemoryHigh(snapshot.MemoryUsedPercent);
         if (memoryHigh && !_memoryWasHigh) Alert(L.F("monitor.alert.memory", Math.Round(snapshot.MemoryUsedPercent)));

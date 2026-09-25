@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
 
 namespace Grip.Interop;
 
@@ -304,6 +305,28 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool FreeLibrary(IntPtr hLibModule);
+
+    // ---------- PawnIO device (CPU temperature) ----------
+    public const uint GENERIC_READ = 0x80000000;
+    public const uint GENERIC_WRITE = 0x40000000;
+    public const uint FILE_SHARE_READ = 0x1;
+    public const uint FILE_SHARE_WRITE = 0x2;
+    public const uint OPEN_EXISTING = 3;
+    public const uint FILE_ATTRIBUTE_NORMAL = 0x80;
+    public static readonly IntPtr INVALID_HANDLE_VALUE = new(-1);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern SafeFileHandle CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode,
+        IntPtr lpSecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
+
+    /// <summary>Buffers are plain byte[] rather than pointers: the CLR marshaler pins a blittable
+    /// array for the call's duration on its own, so this needs no `unsafe`/`fixed` block — one
+    /// less thing to get wrong in the one place in this app that talks to a kernel driver.</summary>
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool DeviceIoControl(SafeFileHandle hDevice, uint dwIoControlCode,
+        byte[]? lpInBuffer, uint nInBufferSize, byte[]? lpOutBuffer, uint nOutBufferSize,
+        out uint lpBytesReturned, IntPtr lpOverlapped);
 
     public const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
 

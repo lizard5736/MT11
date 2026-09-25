@@ -11,6 +11,7 @@ public static class MonitorWarnings
     public const double DiskLowFreePercent = 5;
     public const double BatteryLowPercent = 10;
     public const double GpuHighTemperatureCelsius = 85;
+    public const double CpuHighTemperatureCelsius = 90;
 
     public static bool IsCpuHigh(double percent) => percent >= CpuHighPercent;
 
@@ -19,6 +20,8 @@ public static class MonitorWarnings
     public static bool IsDiskLow(double freePercent) => freePercent <= DiskLowFreePercent;
 
     public static bool IsGpuTemperatureHigh(double celsius) => celsius >= GpuHighTemperatureCelsius;
+
+    public static bool IsCpuTemperatureHigh(double celsius) => celsius >= CpuHighTemperatureCelsius;
 
     /// <summary>Low and not charging — plugged in at 5% isn't a warning, unplugged at 5% is.</summary>
     public static bool IsBatteryLow(double percent, bool charging) => !charging && percent <= BatteryLowPercent;

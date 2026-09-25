@@ -46,4 +46,11 @@
     <Resource Include="Assets\grip.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Signed PawnIO module for AMD CPU temperature (SMN reads) — see THIRD_PARTY_NOTICES.md
+         at the repo root for its origin, license and checksum. Not a NuGet package: PawnIO
+         modules are only published as signed release attachments, so the file is vendored. -->
+    <EmbeddedResource Include="Resources\PawnIO\AMDFamily17.bin" LogicalName="Grip.Resources.PawnIO.AMDFamily17.bin" />
+  </ItemGroup>
+
 </Project>

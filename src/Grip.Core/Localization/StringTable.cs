@@ -255,7 +255,8 @@ public static partial class StringTable
         F("monitorBattery", "Батарея", "Battery",
             "Заряд и состояние питания. Здоровье и циклы — в планах.", "Charge and power state. Health and cycle count are still planned.");
         F("cpuTemperature", "Температура CPU", "CPU temperature",
-            "Датчики процессора через драйвер PawnIO.", "Processor sensors through the PawnIO driver.");
+            "Датчик Tctl через драйвер PawnIO — нужны права администратора (см. «Доступы») и отдельная установка драйвера (winget id namazso.PawnIO). Пока только для AMD; для Intel ещё не сделано.",
+            "The Tctl sensor via the PawnIO driver — needs Grip running as administrator (see “Access”) and the driver installed separately (winget id namazso.PawnIO). AMD-only for now; Intel isn't done yet.");
         F("trayReadouts", "Показатели в трее", "Tray readouts",
             "Загрузка процессора во всплывающей подсказке над значком — наведи курсор, без клика.",
             "CPU load in the tray icon's hover tooltip — no click needed.");

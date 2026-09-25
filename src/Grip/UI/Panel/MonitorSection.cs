@@ -23,6 +23,7 @@ public sealed class MonitorSection : PanelSection
 
     private TextBlock? _cpuValue;
     private TextBlock? _cpuName;
+    private TextBlock? _cpuStats;
     private Sparkline? _cpuGraph;
     private CoreMeter? _coreMeter;
 
@@ -85,6 +86,7 @@ public sealed class MonitorSection : PanelSection
         _stack.Children.Clear();
         _cpuValue = null;
         _cpuName = null;
+        _cpuStats = null;
         _cpuGraph = null;
         _coreMeter = null;
         _memValue = null;
@@ -219,6 +221,8 @@ public sealed class MonitorSection : PanelSection
             Visibility = Monitor.CpuName == null ? Visibility.Collapsed : Visibility.Visible,
         };
         body.Children.Add(_cpuName);
+        _cpuStats = new TextBlock { Style = (Style)Application.Current.FindResource("Grip.Text.Caption"), Margin = new Thickness(0, 4, 0, 0) };
+        body.Children.Add(_cpuStats);
         _cpuGraph = new Sparkline { Height = 28, Max = 100, Margin = new Thickness(0, 6, 0, 0) };
         body.Children.Add(_cpuGraph);
         _coreMeter = new CoreMeter { Height = 20, Margin = new Thickness(0, 6, 0, 0) };
@@ -326,6 +330,14 @@ public sealed class MonitorSection : PanelSection
             Warn(_cpuValue, MonitorWarnings.IsCpuHigh(snapshot.CpuPercent));
             _cpuGraph!.SetValues(Monitor.CpuHistory.Values);
             _coreMeter?.SetValues(snapshot.CpuCorePercents);
+
+            if (_cpuStats != null)
+            {
+                var temperature = snapshot.CpuTemperatureCelsius;
+                _cpuStats.Text = temperature is { } t ? $"{Math.Round(t)}°C" : "";
+                _cpuStats.Visibility = temperature == null ? Visibility.Collapsed : Visibility.Visible;
+                WarnCaption(_cpuStats, temperature is { } warnT && MonitorWarnings.IsCpuTemperatureHigh(warnT));
+            }
         }
 
         if (_memValue != null)

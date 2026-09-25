@@ -32,7 +32,8 @@ public sealed record MonitorSnapshot(
     bool HasBattery,
     int BatteryPercent,
     bool BatteryCharging,
-    IReadOnlyList<ProcessSample> TopProcesses)
+    IReadOnlyList<ProcessSample> TopProcesses,
+    double? CpuTemperatureCelsius)
 {
     public double MemoryUsedPercent => MemoryTotalBytes <= 0 ? 0 : MemoryUsedBytes * 100.0 / MemoryTotalBytes;
 }
@@ -50,6 +51,11 @@ public sealed record MonitorSnapshot(
 /// monitoring tool uses for exactly this, has been stable for decades, and
 /// marshals as a plain fixed-size struct array — none of the variable-length
 /// buffer risk that keeps GPU load on typeperf instead of raw PDH.
+///
+/// CPU temperature is the one exception: it needs the separately-installed PawnIO driver
+/// (see AmdCpuTemperatureReader), and is AMD-only for now. Null on Intel, on a machine
+/// without PawnIO installed, or if the read fails — same graceful-null pattern as every
+/// other reading here.
 /// </summary>
 public sealed class SystemMonitorService
 {
@@ -65,6 +71,7 @@ public sealed class SystemMonitorService
     private IReadOnlyList<ProcessSample> _lastTopProcesses = Array.Empty<ProcessSample>();
     private int _tick;
     private readonly HashSet<string> _keepAliveOwners = new();
+    private readonly Lazy<AmdCpuTemperatureReader> _cpuTemperature = new(() => new AmdCpuTemperatureReader());
 
     public SampleHistory CpuHistory { get; } = new(HistoryLength);
     public SampleHistory MemoryHistory { get; } = new(HistoryLength);
@@ -74,6 +81,11 @@ public sealed class SystemMonitorService
     public string? CpuName { get; } = ReadCpuName();
 
     public bool IsRunning { get; private set; }
+
+    /// <summary>Gate for the PawnIO read, set by AppServices from the CpuTemperature feature
+    /// toggle. Off by default: a kernel-driver IOCTL on every tick is not something to run
+    /// for a feature the user hasn't opted into, even a harmless one.</summary>
+    public bool CpuTemperatureEnabled { get; set; }
 
     public MonitorSnapshot? Latest { get; private set; }
 
@@ -186,8 +198,10 @@ public sealed class SystemMonitorService
         _tick++;
         if (_tick % ProcessSampleEveryNTicks == 0 || _lastTopProcesses.Count == 0) _lastTopProcesses = TopProcesses();
 
+        double? cpuTemperature = CpuTemperatureEnabled ? _cpuTemperature.Value.ReadTemperature() : null;
+
         Latest = new MonitorSnapshot(cpu, corePercents, memUsed, memTotal, drives, up, down, sessionSent, sessionReceived,
-            LocalIPv4(), hasBattery, batteryPercent, charging, _lastTopProcesses);
+            LocalIPv4(), hasBattery, batteryPercent, charging, _lastTopProcesses, cpuTemperature);
         Sampled?.Invoke(this, EventArgs.Empty);
     }
 

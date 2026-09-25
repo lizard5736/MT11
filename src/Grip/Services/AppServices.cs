@@ -161,6 +161,7 @@ public sealed class AppServices : IDisposable
             Shelf.ApplySettings();
             Radial.ApplySettings();
             if (!s.IsInstalled(FeatureIds.KeepAwake) && KeepAwake.IsActive) KeepAwake.Stop();
+            Monitor.CpuTemperatureEnabled = s.IsInstalled(FeatureIds.CpuTemperature);
             if (s.IsInstalled(FeatureIds.TrayReadouts)) TrayReadouts.Start(); else TrayReadouts.Stop();
             if (s.IsInstalled(FeatureIds.MonitorAlerts)) Alerts.Start(); else Alerts.Stop();
             UpdateTray();

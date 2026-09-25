@@ -84,8 +84,8 @@ public static partial class StringTable
         A("access.admin.title", "Права администратора", "Administrator rights");
         A("access.admin.granted", "Grip запущен от имени администратора", "Grip runs as administrator");
         A("access.admin.normal", "Grip запущен с обычными правами", "Grip runs with standard rights");
-        A("access.admin.desc", "Windows не даёт обычным программам нажимать клавиши и вставлять текст в окна, запущенные от имени администратора. Если нужно работать с такими окнами, перезапустите Grip с правами администратора.",
-            "Windows doesn't let regular apps press keys or paste into windows running as administrator. If you work with such windows, restart Grip as administrator.");
+        A("access.admin.desc", "Windows не даёт обычным программам нажимать клавиши и вставлять текст в окна, запущенные от имени администратора, и не даёт читать температуру процессора через PawnIO. Если нужно то или другое, перезапустите Grip с правами администратора.",
+            "Windows doesn't let regular apps press keys or paste into windows running as administrator, or read CPU temperature through PawnIO. If you need either, restart Grip as administrator.");
         A("access.admin.restart", "Перезапустить от имени администратора", "Restart as administrator");
         A("access.background.title", "Что работает в фоне", "What runs in the background");
         A("access.background.desc", "Только установленные и включённые функции. Остальные ничего не загружают.", "Only installed, switched-on features. Everything else loads nothing.");
