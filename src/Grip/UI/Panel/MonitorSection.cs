@@ -42,6 +42,7 @@ public sealed class MonitorSection : PanelSection
 
     private TextBlock? _gpuValue;
     private TextBlock? _gpuName;
+    private TextBlock? _gpuStats;
     private TextBlock? _gpuState;
     private StackPanel? _gpuRows;
 
@@ -98,6 +99,7 @@ public sealed class MonitorSection : PanelSection
         _battState = null;
         _gpuValue = null;
         _gpuName = null;
+        _gpuStats = null;
         _gpuState = null;
         _gpuRows = null;
 
@@ -236,6 +238,8 @@ public sealed class MonitorSection : PanelSection
             Visibility = Gpu.GpuName == null ? Visibility.Collapsed : Visibility.Visible,
         };
         body.Children.Add(_gpuName);
+        _gpuStats = new TextBlock { Style = (Style)Application.Current.FindResource("Grip.Text.Caption"), Margin = new Thickness(0, 4, 0, 0) };
+        body.Children.Add(_gpuStats);
         _gpuState = new TextBlock { Style = (Style)Application.Current.FindResource("Grip.Text.Caption"), Margin = new Thickness(0, 4, 0, 0) };
         body.Children.Add(_gpuState);
         _gpuRows = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
@@ -366,6 +370,8 @@ public sealed class MonitorSection : PanelSection
     private void RenderGpu(double? percent)
     {
         if (_gpuValue == null) return;
+        bool ru = Localizer.Instance.Language == UiLanguage.Ru;
+        var culture = Localizer.Instance.Culture;
 
         if (_gpuName != null)
         {
@@ -383,6 +389,18 @@ public sealed class MonitorSection : PanelSection
         {
             _gpuValue.Text = "";
             _gpuState!.Text = L.S("monitor.gpu.unavailable");
+        }
+
+        if (_gpuStats != null)
+        {
+            var temperature = Gpu.TemperatureCelsius;
+            var memory = Gpu.MemoryInfo;
+            var parts = new List<string>();
+            if (temperature is { } t) parts.Add($"{Math.Round(t)}°C");
+            if (memory is { } m) parts.Add($"{ByteFormat.Size(m.Used, culture, ru)} / {ByteFormat.Size(m.Total, culture, ru)}");
+            _gpuStats.Text = string.Join("  ·  ", parts);
+            _gpuStats.Visibility = parts.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+            WarnCaption(_gpuStats, temperature is { } warnT && MonitorWarnings.IsGpuTemperatureHigh(warnT));
         }
 
         RenderProcessRows(_gpuRows, Gpu.TopProcesses.Take(3).Select(p => (p.ProcessId, p.Name, $"{Math.Round(p.Percent)}%")));
@@ -413,4 +431,13 @@ public sealed class MonitorSection : PanelSection
 
     private static void Warn(TextBlock text, bool isWarning) =>
         text.SetResourceReference(TextBlock.ForegroundProperty, isWarning ? "Grip.Rec" : "Grip.Text");
+
+    /// <summary>Same idea as <see cref="Warn"/>, but for a Grip.Text.Caption block: clearing
+    /// back to the style's own muted color instead of hardcoding the primary text color, so
+    /// a non-warning caption doesn't turn as bright as a headline value.</summary>
+    private static void WarnCaption(TextBlock text, bool isWarning)
+    {
+        if (isWarning) text.SetResourceReference(TextBlock.ForegroundProperty, "Grip.Rec");
+        else text.ClearValue(TextBlock.ForegroundProperty);
+    }
 }

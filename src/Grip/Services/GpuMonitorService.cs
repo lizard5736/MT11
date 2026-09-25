@@ -22,6 +22,11 @@ public readonly record struct GpuProcessInfo(int ProcessId, string Name, double 
 /// SystemMonitorService does. Any failure (no GPU Engine category, typeperf missing,
 /// sandboxed environment, timeout) degrades to a null/empty reading, never a crash or a
 /// visible error.
+///
+/// Temperature and VRAM use are a separate, NVIDIA-only path through NVML (see
+/// NvmlReader): the vendor-agnostic GPU Engine counters above only carry load, and there
+/// is no equally generic counter for either of those two. AMD/Intel report null for both
+/// until an ADL- or Level-Zero-based reader is worth the extra vendor-specific code.
 /// </summary>
 public sealed class GpuMonitorService
 {
@@ -30,9 +35,12 @@ public sealed class GpuMonitorService
 
     private readonly object _lock = new();
     private double? _percent;
+    private double? _temperatureCelsius;
+    private (long Used, long Total)? _memoryInfo;
     private IReadOnlyList<GpuProcessInfo> _topProcesses = Array.Empty<GpuProcessInfo>();
     private CancellationTokenSource? _cts;
     private readonly HashSet<string> _keepAliveOwners = new();
+    private readonly Lazy<NvmlReader> _nvml = new(() => new NvmlReader());
 
     public bool IsRunning => _cts != null;
 
@@ -49,6 +57,18 @@ public sealed class GpuMonitorService
     public IReadOnlyList<GpuProcessInfo> TopProcesses
     {
         get { lock (_lock) return _topProcesses; }
+    }
+
+    /// <summary>NVIDIA only, via NVML. Null on AMD/Intel, or if unavailable.</summary>
+    public double? TemperatureCelsius
+    {
+        get { lock (_lock) return _temperatureCelsius; }
+    }
+
+    /// <summary>(UsedBytes, TotalBytes). NVIDIA only, via NVML. Null on AMD/Intel, or if unavailable.</summary>
+    public (long Used, long Total)? MemoryInfo
+    {
+        get { lock (_lock) return _memoryInfo; }
     }
 
     public event EventHandler? Sampled;
@@ -97,10 +117,17 @@ public sealed class GpuMonitorService
             {
                 Log.Error("GPU sample failed", ex);
             }
+
+            var nvml = _nvml.Value;
+            double? temperature = nvml.ReadTemperature();
+            (long Used, long Total)? memory = nvml.ReadMemory();
+
             lock (_lock)
             {
                 _percent = percent;
                 _topProcesses = processes;
+                _temperatureCelsius = temperature;
+                _memoryInfo = memory;
             }
             Sampled?.Invoke(this, EventArgs.Empty);
             try

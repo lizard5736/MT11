@@ -16,6 +16,7 @@ public static partial class StringTable
         A("monitor.alert.cpu", "Процессор загружен на {0}%", "CPU load at {0}%");
         A("monitor.alert.memory", "Память заполнена на {0}%", "Memory at {0}%");
         A("monitor.alert.gpu", "Видеокарта загружена на {0}%", "GPU load at {0}%");
+        A("monitor.alert.gpuTemperature", "Видеокарта разогрелась до {0}°C", "GPU temperature at {0}°C");
         A("monitor.alert.battery", "Батарея разряжена: {0}%", "Battery low: {0}%");
         A("monitor.alert.disk", "Диск «{0}» почти заполнен", "Disk “{0}” is almost full");
     }

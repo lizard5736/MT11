@@ -244,7 +244,8 @@ public static partial class StringTable
         F("monitorCpu", "Процессор", "Processor",
             "Загрузка процессора с историей.", "Processor load with history.");
         F("monitorGpu", "Видеокарта", "Graphics card",
-            "Загрузка видеокарты. Память и температура — в планах.", "GPU load. Memory and temperature are still planned.");
+            "Загрузка, топ-3 процесса, температура и память. Температура и память — пока только для NVIDIA (через NVML); для AMD и Intel ещё не сделаны.",
+            "Load, top 3 processes, temperature and memory. Temperature and memory are NVIDIA-only for now (via NVML); AMD and Intel aren't done yet.");
         F("monitorMemory", "Память", "Memory",
             "Занятая память и приложения, которые её едят.", "Memory in use and the apps eating it.");
         F("monitorDisk", "Диски", "Disks",

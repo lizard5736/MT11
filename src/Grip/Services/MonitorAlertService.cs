@@ -18,7 +18,7 @@ public sealed class MonitorAlertService
     private readonly GpuMonitorService _gpu;
     private readonly HudService _hud;
     private readonly HashSet<string> _disksLow = new();
-    private bool _cpuWasHigh, _memoryWasHigh, _batteryWasLow, _gpuWasHigh;
+    private bool _cpuWasHigh, _memoryWasHigh, _batteryWasLow, _gpuWasHigh, _gpuWasHot;
 
     public bool IsRunning { get; private set; }
 
@@ -37,6 +37,7 @@ public sealed class MonitorAlertService
         // already in — only for a threshold crossed while this has been watching.
         if (_monitor.Latest is { } snapshot) SyncBaseline(snapshot);
         _gpuWasHigh = _gpu.Latest is { } percent && percent >= MonitorWarnings.CpuHighPercent;
+        _gpuWasHot = _gpu.TemperatureCelsius is { } temp && MonitorWarnings.IsGpuTemperatureHigh(temp);
         _monitor.Sampled += OnSampled;
         _gpu.Sampled += OnGpuSampled;
         _monitor.Start("alerts");
@@ -93,6 +94,10 @@ public sealed class MonitorAlertService
         bool gpuHigh = _gpu.Latest is { } percent && percent >= MonitorWarnings.CpuHighPercent;
         if (gpuHigh && !_gpuWasHigh) Alert(L.F("monitor.alert.gpu", Math.Round(_gpu.Latest!.Value)));
         _gpuWasHigh = gpuHigh;
+
+        bool gpuHot = _gpu.TemperatureCelsius is { } temp && MonitorWarnings.IsGpuTemperatureHigh(temp);
+        if (gpuHot && !_gpuWasHot) Alert(L.F("monitor.alert.gpuTemperature", Math.Round(_gpu.TemperatureCelsius!.Value)));
+        _gpuWasHot = gpuHot;
     }
 
     private void Alert(string text) => _hud.Show(text, "Warning", HudTone.Rec, force: true);

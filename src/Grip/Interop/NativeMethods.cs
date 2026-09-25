@@ -293,6 +293,18 @@ internal static class NativeMethods
     [DllImport("kernel32.dll")]
     public static extern IntPtr LocalFree(IntPtr hMem);
 
+    /// <summary>For loading a DLL that isn't on the default search path (e.g. nvml.dll, which
+    /// NVIDIA's driver installs under Program Files, not System32 or PATH).</summary>
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern IntPtr LoadLibraryW(string lpLibFileName);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    public static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool FreeLibrary(IntPtr hLibModule);
+
     public const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
 
     /// <summary>System-wide idle/kernel/user time since boot, for computing CPU load between two snapshots.</summary>
