@@ -86,6 +86,7 @@ public sealed class AppServices : IDisposable
     public GpuMonitorService Gpu { get; } = new();
     public WindowLayoutService WindowLayout { get; } = new();
     public NotepadService Notepad { get; } = new();
+    public TrayReadoutService TrayReadouts { get; } = new();
 
     private ClipboardWindow? _clipboardWindow;
     private CommandBarWindow? _commandBar;
@@ -122,6 +123,7 @@ public sealed class AppServices : IDisposable
         Tray.ContextMenuRequested += (_, _) => Tray.ShowMenu(TrayService.BuildMenu(Execute, KeepAwake.IsActive,
             Settings.Current.IsInstalled(FeatureIds.KeepAwake)));
         KeepAwake.Changed += (_, _) => UpdateTray();
+        TrayReadouts.Sampled += (_, _) => UpdateTray();
         Settings.Changed += (_, _) => ApplySettings();
         ApplySettings();
         Tray.Show();
@@ -157,6 +159,7 @@ public sealed class AppServices : IDisposable
             Shelf.ApplySettings();
             Radial.ApplySettings();
             if (!s.IsInstalled(FeatureIds.KeepAwake) && KeepAwake.IsActive) KeepAwake.Stop();
+            if (s.IsInstalled(FeatureIds.TrayReadouts)) TrayReadouts.Start(); else TrayReadouts.Stop();
             UpdateTray();
         }
         finally
@@ -168,7 +171,10 @@ public sealed class AppServices : IDisposable
     private void UpdateTray()
     {
         bool dot = KeepAwake.IsActive && Settings.Current.KeepAwake.ShowInTrayIcon;
-        Tray.SetStatus(dot, L.S(KeepAwake.IsActive ? "tray.tooltip.awake" : "tray.tooltip"));
+        string text = L.S(KeepAwake.IsActive ? "tray.tooltip.awake" : "tray.tooltip");
+        if (Settings.Current.IsInstalled(FeatureIds.TrayReadouts) && TrayReadouts.Latest is { } cpu)
+            text = L.F("tray.tooltip.readout", text, (int)Math.Round(cpu));
+        Tray.SetStatus(dot, text);
     }
 
     // ---------- actions ----------
@@ -269,6 +275,7 @@ public sealed class AppServices : IDisposable
     {
         Settings.SaveNow();
         Notepad.Dispose();
+        TrayReadouts.Stop();
         Monitor.Stop();
         Gpu.Stop();
         KeepAwake.Dispose();

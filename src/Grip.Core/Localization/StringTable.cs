@@ -94,6 +94,7 @@ public static partial class StringTable
     {
         A("tray.tooltip", "Grip", "Grip");
         A("tray.tooltip.awake", "Grip · не спит", "Grip · awake");
+        A("tray.tooltip.readout", "{0} · CPU {1}%", "{0} · CPU {1}%");
         A("tray.menu.panel", "Открыть панель", "Open panel");
         A("tray.menu.settings", "Настройки…", "Settings…");
         A("tray.menu.quit", "Выйти из Grip", "Quit Grip");
@@ -255,7 +256,8 @@ public static partial class StringTable
         F("cpuTemperature", "Температура CPU", "CPU temperature",
             "Датчики процессора через драйвер PawnIO.", "Processor sensors through the PawnIO driver.");
         F("trayReadouts", "Показатели в трее", "Tray readouts",
-            "Цифры загрузки и температуры прямо на панели задач.", "Load and temperature numbers right on the taskbar.");
+            "Загрузка процессора во всплывающей подсказке над значком — наведи курсор, без клика.",
+            "CPU load in the tray icon's hover tooltip — no click needed.");
         F("monitorAlerts", "Предупреждения", "Alerts",
             "Уведомления о нагрузке, перегреве, нехватке памяти и места.", "Alerts for load, heat, low memory and low disk space.");
         F("windowSwitcher", "Переключатель окон", "Window switcher",
