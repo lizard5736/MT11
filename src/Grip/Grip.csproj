@@ -33,6 +33,9 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <!-- The GPU's display name (Win32_VideoController): no simpler safe way to read it than WMI. -->
     <PackageReference Include="System.Management" Version="9.0.0" />
+    <!-- Parses Markdown for the scratchpad's preview. Pure managed code, no native/COM
+         surface — unlike WMI or PDH, a parsing bug here can only mis-render, never crash. -->
+    <PackageReference Include="Markdig" Version="0.41.3" />
   </ItemGroup>
 
   <ItemGroup>

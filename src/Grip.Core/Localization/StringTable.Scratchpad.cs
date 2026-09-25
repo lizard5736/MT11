@@ -7,6 +7,7 @@ public static partial class StringTable
         A("scratchpad.title", "Блокнот", "Scratchpad");
         A("scratchpad.untitled", "Без названия", "Untitled");
         A("scratchpad.new", "Новая заметка", "New note");
+        A("scratchpad.preview", "Предпросмотр Markdown", "Markdown preview");
         A("scratchpad.autosave", "Сохраняется автоматически", "Saves automatically");
         A("scratchpad.delete.confirm", "Удалить заметку «{0}»?", "Delete note “{0}”?");
     }

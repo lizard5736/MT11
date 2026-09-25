@@ -18,6 +18,7 @@ public partial class NotepadWindow : Window
 {
     private string? _selectedId;
     private bool _suppressTextChanged;
+    private bool _previewMode;
 
     /// <summary>Preview mode renders without positioning or DWM chrome calls.</summary>
     public bool IsPreview { get; init; }
@@ -43,6 +44,13 @@ public partial class NotepadWindow : Window
         _selectedId = Notes.Notes.Count > 0 ? Notes.Notes[0].Id : null;
         RenderTabs();
         LoadEditor();
+    }
+
+    /// <summary>Preview-harness hook: flips into Markdown preview mode without a real click.</summary>
+    public void PreviewShowMarkdown()
+    {
+        PreviewToggle.IsChecked = true;
+        OnTogglePreview(this, new RoutedEventArgs());
     }
 
     public void Toggle()
@@ -166,7 +174,19 @@ public partial class NotepadWindow : Window
         _suppressTextChanged = true;
         Editor.Text = note?.Content ?? "";
         _suppressTextChanged = false;
-        Editor.Focus();
+        if (_previewMode) RenderPreview();
+        else Editor.Focus();
+    }
+
+    private void RenderPreview() => Preview.Document = MarkdownRenderer.Render(Editor.Text, this);
+
+    private void OnTogglePreview(object sender, RoutedEventArgs e)
+    {
+        _previewMode = PreviewToggle.IsChecked == true;
+        Editor.Visibility = _previewMode ? Visibility.Collapsed : Visibility.Visible;
+        Preview.Visibility = _previewMode ? Visibility.Visible : Visibility.Collapsed;
+        if (_previewMode) RenderPreview();
+        else Editor.Focus();
     }
 
     private void FlushEditor()

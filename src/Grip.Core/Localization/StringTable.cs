@@ -214,8 +214,8 @@ public static partial class StringTable
             "Плавающая палитра любимых инструментов по горячей клавише.",
             "A floating palette of favorite tools on a shortcut.");
         F("scratchpad", "Блокнот", "Scratchpad",
-            "Текстовые заметки во вкладках с автосохранением, прямо из трея.",
-            "Autosaved text notes in tabs, right from the tray.");
+            "Заметки во вкладках с автосохранением и предпросмотром Markdown, прямо из трея.",
+            "Autosaved notes in tabs with a Markdown preview, right from the tray.");
         F("cleaningMode", "Режим уборки", "Cleaning mode",
             "Блокирует клавиатуру, пока вы её протираете.",
             "Locks the keyboard while you wipe it.");

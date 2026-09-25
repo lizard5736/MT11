@@ -120,6 +120,13 @@ public static class PreviewRenderer
                 RenderWindow(window, 420, 480, Path.Combine(dir, "notepad.png"));
             });
 
+            Try("notepad-preview", () =>
+            {
+                var window = new NotepadWindow { IsPreview = true };
+                window.PreviewShowMarkdown();
+                RenderWindow(window, 420, 480, Path.Combine(dir, "notepad-preview.png"));
+            });
+
             Try("hud", () =>
             {
                 var window = new HudWindow();
@@ -186,7 +193,9 @@ public static class PreviewRenderer
         var notes = services.Notepad.Notes;
         foreach (var blank in notes.Notes.ToList()) notes.Remove(blank.Id); // drop the auto-created empty note before seeding samples
         var n1 = notes.Add();
-        notes.SetContent(n1.Id, "Идеи для монтажа\nПопробовать джамп-каты во второй сцене.\nПроверить синхрон звука на дубле 4.", now);
+        notes.SetContent(n1.Id,
+            "# Идеи для монтажа\n\nПопробовать **джамп-каты** во второй сцене.\n\n- Проверить синхрон звука на дубле 4\n- Обрезать паузу перед репликой Марка\n\n`ffmpeg -i in.mov -c copy out.mp4`",
+            now);
         var n2 = notes.Add();
         notes.SetContent(n2.Id, "Список дел\n- Экспорт в ProRes для продюсера\n- Забрать диск у оператора", now);
 
