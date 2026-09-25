@@ -11,6 +11,7 @@ using Grip.Services;
 using Grip.UI.Clipboard;
 using Grip.UI.Common;
 using Grip.UI.CommandBar;
+using Grip.UI.Notes;
 using Grip.UI.Panel;
 using Grip.UI.Radial;
 using Grip.UI.Settings;
@@ -113,6 +114,12 @@ public static class PreviewRenderer
                 RenderWindow(window, 300, 360, Path.Combine(dir, "shelf.png"));
             });
 
+            Try("notepad", () =>
+            {
+                var window = new NotepadWindow { IsPreview = true };
+                RenderWindow(window, 420, 480, Path.Combine(dir, "notepad.png"));
+            });
+
             Try("hud", () =>
             {
                 var window = new HudWindow();
@@ -175,6 +182,13 @@ public static class PreviewRenderer
         var image = SampleImage();
         if (image != null) history.AddOrPromote(image, now.AddMinutes(-2));
         history.AddOrPromote(ClipEntry.FromText("INT. КВАРТИРА — НОЧЬ. Героиня смотрит в окно, за стеклом — огни города.", "WINWORD.EXE", now.AddSeconds(-40)), now.AddSeconds(-40));
+
+        var notes = services.Notepad.Notes;
+        foreach (var blank in notes.Notes.ToList()) notes.Remove(blank.Id); // drop the auto-created empty note before seeding samples
+        var n1 = notes.Add();
+        notes.SetContent(n1.Id, "Идеи для монтажа\nПопробовать джамп-каты во второй сцене.\nПроверить синхрон звука на дубле 4.", now);
+        var n2 = notes.Add();
+        notes.SetContent(n2.Id, "Список дел\n- Экспорт в ProRes для продюсера\n- Забрать диск у оператора", now);
 
         services.AppCatalog.SetForPreview(new[]
         {

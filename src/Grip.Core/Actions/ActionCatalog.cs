@@ -16,6 +16,7 @@ public static class ActionIds
     public const string ClearClipboard = "grip.clearClipboard";
     public const string RadialMenu = "grip.radial";
     public const string Shelf = "grip.shelf";
+    public const string Scratchpad = "grip.scratchpad";
     public const string KeepAwakeToggle = "grip.keepAwake";
 
     // System
@@ -76,6 +77,7 @@ public static class ActionCatalog
         new(ActionIds.ClearClipboard, ActionCategory.Grip, "Broom", FeatureIds.ClipboardHistory),
         new(ActionIds.RadialMenu, ActionCategory.Grip, "DataPie", FeatureIds.RadialMenu, "Win+Alt+Q"),
         new(ActionIds.Shelf, ActionCategory.Grip, "TrayItemAdd", FeatureIds.Shelf, "Win+Alt+S"),
+        new(ActionIds.Scratchpad, ActionCategory.Grip, "Edit", FeatureIds.Scratchpad, "Win+Alt+N"),
         new(ActionIds.KeepAwakeToggle, ActionCategory.Grip, "WeatherMoon", FeatureIds.KeepAwake),
 
         new(ActionIds.LockScreen, ActionCategory.System, "LockClosed", null),

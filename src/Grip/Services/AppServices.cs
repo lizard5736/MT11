@@ -9,6 +9,7 @@ using Grip.UI;
 using Grip.UI.Clipboard;
 using Grip.UI.Common;
 using Grip.UI.CommandBar;
+using Grip.UI.Notes;
 using Grip.UI.Panel;
 using Grip.UI.Radial;
 using Grip.UI.Settings;
@@ -84,9 +85,11 @@ public sealed class AppServices : IDisposable
     public SystemMonitorService Monitor { get; } = new();
     public GpuMonitorService Gpu { get; } = new();
     public WindowLayoutService WindowLayout { get; } = new();
+    public NotepadService Notepad { get; } = new();
 
     private ClipboardWindow? _clipboardWindow;
     private CommandBarWindow? _commandBar;
+    private NotepadWindow? _scratchpadWindow;
     private SettingsWindow? _settingsWindow;
     private bool _applying;
 
@@ -201,6 +204,10 @@ public sealed class AppServices : IDisposable
             case ActionIds.ClearClipboard: Clipboard.ClearSystemClipboard(showHud: true); break;
             case ActionIds.RadialMenu: Radial.OpenFromHotkey(); break;
             case ActionIds.Shelf: Shelf.Toggle(); break;
+            case ActionIds.Scratchpad:
+                _scratchpadWindow ??= new NotepadWindow();
+                _scratchpadWindow.Toggle();
+                break;
             case ActionIds.KeepAwakeToggle:
                 KeepAwake.Toggle();
                 Hud.Show(KeepAwake.IsActive
@@ -255,6 +262,7 @@ public sealed class AppServices : IDisposable
     public void Dispose()
     {
         Settings.SaveNow();
+        Notepad.Dispose();
         Monitor.Stop();
         Gpu.Stop();
         KeepAwake.Dispose();

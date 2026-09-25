@@ -20,6 +20,7 @@ public static partial class StringTable
         AddSettings(A);
         AddTools(A);
         AddMonitor(A);
+        AddScratchpad(A);
         return d;
     }
 
@@ -213,8 +214,8 @@ public static partial class StringTable
             "Плавающая палитра любимых инструментов по горячей клавише.",
             "A floating palette of favorite tools on a shortcut.");
         F("scratchpad", "Блокнот", "Scratchpad",
-            "Заметки во вкладках с автосохранением и предпросмотром Markdown.",
-            "Autosaved notes in tabs with a Markdown preview.");
+            "Текстовые заметки во вкладках с автосохранением, прямо из трея.",
+            "Autosaved text notes in tabs, right from the tray.");
         F("cleaningMode", "Режим уборки", "Cleaning mode",
             "Блокирует клавиатуру, пока вы её протираете.",
             "Locks the keyboard while you wipe it.");
@@ -329,6 +330,7 @@ public static partial class StringTable
         A("action.clearClipboard", "Очистить буфер обмена", "Clear the clipboard");
         A("action.radial", "Радиальное меню", "Radial menu");
         A("action.shelf", "Полка", "Shelf");
+        A("action.scratchpad", "Блокнот", "Scratchpad");
         A("action.keepAwake", "Не спать: вкл./выкл.", "Keep awake on/off");
         A("action.sys.lock", "Заблокировать компьютер", "Lock the PC");
         A("action.sys.displayOff", "Погасить экран", "Turn the screen off");

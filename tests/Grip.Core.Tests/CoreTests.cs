@@ -7,6 +7,7 @@ using Grip.Core.Features;
 using Grip.Core.Input;
 using Grip.Core.Localization;
 using Grip.Core.Monitoring;
+using Grip.Core.Notes;
 using Grip.Core.Radial;
 using Grip.Core.Search;
 using Grip.Core.Settings;
@@ -898,5 +899,90 @@ public class ByteFormatTests
     public void FormatsEnglishRate()
     {
         Assert.Equal("1.4 MB/s", ByteFormat.Rate(1024 * 1024 * 1.4, CultureInfo.GetCultureInfo("en-US"), russian: false));
+    }
+}
+
+public class NoteTitleTests
+{
+    [Fact]
+    public void UsesFirstNonBlankLine()
+    {
+        Assert.Equal("Идеи для монтажа", NoteTitle.From("\n\n  Идеи для монтажа  \nостальной текст", "Untitled"));
+    }
+
+    [Fact]
+    public void StripsLeadingHeadingMarks()
+    {
+        Assert.Equal("Список дел", NoteTitle.From("## Список дел\n- пункт", "Untitled"));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   \n   ")]
+    [InlineData("#")]
+    public void FallsBackToPlaceholderWhenBlank(string? content) =>
+        Assert.Equal("Untitled", NoteTitle.From(content, "Untitled"));
+
+    [Fact]
+    public void TruncatesLongLines()
+    {
+        var title = NoteTitle.From("This first line is definitely longer than the tab can comfortably show", "Untitled");
+        Assert.EndsWith("…", title);
+        Assert.True(title.Length <= NoteTitle.MaxLength + 1);
+    }
+}
+
+public class NoteStoreTests
+{
+    [Fact]
+    public void AddCreatesANoteWithAUniqueId()
+    {
+        var store = new NoteStore();
+        var a = store.Add();
+        var b = store.Add();
+        Assert.Equal(2, store.Notes.Count);
+        Assert.NotEqual(a.Id, b.Id);
+    }
+
+    [Fact]
+    public void RemoveDropsTheNote()
+    {
+        var store = new NoteStore();
+        var a = store.Add();
+        store.Add();
+        Assert.True(store.Remove(a.Id));
+        Assert.Single(store.Notes);
+        Assert.False(store.Remove(a.Id));
+    }
+
+    [Fact]
+    public void SetContentUpdatesAndFiresChanged()
+    {
+        var store = new NoteStore();
+        var note = store.Add();
+        int changes = 0;
+        store.Changed += (_, _) => changes++;
+        store.SetContent(note.Id, "hello", DateTimeOffset.UtcNow);
+        Assert.Equal("hello", store.Find(note.Id)!.Content);
+        Assert.Equal(1, changes);
+        // Setting the same content again is a no-op, not a second change.
+        store.SetContent(note.Id, "hello", DateTimeOffset.UtcNow);
+        Assert.Equal(1, changes);
+    }
+
+    [Fact]
+    public void PersistsAndReloads()
+    {
+        var store = new NoteStore();
+        var note = store.Add();
+        store.SetContent(note.Id, "line one\nline two", DateTimeOffset.UtcNow);
+        var json = store.Serialize();
+
+        var back = new NoteStore();
+        back.Load(json);
+        Assert.Single(back.Notes);
+        Assert.Equal("line one\nline two", back.Notes[0].Content);
+        Assert.Equal(note.Id, back.Notes[0].Id);
     }
 }

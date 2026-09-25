@@ -146,7 +146,7 @@ public static class FeatureCatalog
         new(FeatureIds.RadialMenu, FeatureGroup.Tools, FeatureStatus.Ready, "DataPie", EnergyProfile.Idle),
         new(FeatureIds.QuickToggles, FeatureGroup.Tools, FeatureStatus.Ready, "ToggleRight", EnergyProfile.Idle),
         new(FeatureIds.QuickPanel, FeatureGroup.Tools, FeatureStatus.Planned, "Grid", EnergyProfile.Idle),
-        new(FeatureIds.Scratchpad, FeatureGroup.Tools, FeatureStatus.Planned, "Edit", EnergyProfile.Idle),
+        new(FeatureIds.Scratchpad, FeatureGroup.Tools, FeatureStatus.Ready, "Edit", EnergyProfile.Idle),
         new(FeatureIds.CleaningMode, FeatureGroup.Tools, FeatureStatus.Planned, "Sparkle", EnergyProfile.Idle),
 
         // Energy and display

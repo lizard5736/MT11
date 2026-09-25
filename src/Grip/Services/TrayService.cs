@@ -158,6 +158,8 @@ public sealed class TrayService : IDisposable
             menu.Items.Add(Item(L.S("action.commandBar"), "WindowConsole", ActionIds.CommandBar));
         if (App.Services.Settings.Current.IsInstalled(Core.Features.FeatureIds.ClipboardHistory))
             menu.Items.Add(Item(L.S("action.clipboard"), "Clipboard", ActionIds.ClipboardHistory));
+        if (App.Services.Settings.Current.IsInstalled(Core.Features.FeatureIds.Scratchpad))
+            menu.Items.Add(Item(L.S("action.scratchpad"), "Edit", ActionIds.Scratchpad));
         if (keepAwakeInstalled)
         {
             var awake = Item(L.S("keepAwake.title"), "WeatherMoon", ActionIds.KeepAwakeToggle);

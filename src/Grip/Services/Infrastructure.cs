@@ -21,6 +21,7 @@ public static class AppPaths
     public static string ClipboardFile => Path.Combine(ClipboardDir, "history.json");
     public static string ClipboardImagesDir => Path.Combine(ClipboardDir, "images");
     public static string LogsDir => Path.Combine(LocalDir, "logs");
+    public static string NotesFile => Path.Combine(LocalDir, "notes.json");
 
     /// <summary>Redirects all data for previews and tests.</summary>
     public static void UseRoot(string root)
