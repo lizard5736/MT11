@@ -330,6 +330,36 @@
         </Setter>
     </Style>
 
+    <!-- ============ Checkbox (Markdown task lists) ============ -->
+    <Style x:Key="Grip.CheckBox" TargetType="CheckBox">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource Grip.FocusVisual}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Border x:Name="Box" Width="16" Height="16" CornerRadius="4" BorderThickness="1.4"
+                            Background="{DynamicResource Grip.Control}" BorderBrush="{DynamicResource Grip.LineStrong}">
+                        <Path x:Name="Check" Data="{StaticResource Icon.Checkmark}" Stretch="Uniform" Margin="3"
+                              Fill="{DynamicResource Grip.OnAccent}" Visibility="Collapsed" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource Grip.Accent}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource Grip.Accent}" />
+                            <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource Grip.Accent}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ============ Chips, tabs, navigation ============ -->
     <Style x:Key="Grip.Chip" TargetType="ToggleButton">
         <Setter Property="FocusVisualStyle" Value="{StaticResource Grip.FocusVisual}" />

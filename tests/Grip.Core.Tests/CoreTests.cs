@@ -13,6 +13,7 @@ using Grip.Core.Search;
 using Grip.Core.Settings;
 using Grip.Core.Text;
 using Grip.Core.Windows;
+using Markdig;
 
 namespace Grip.Core.Tests;
 
@@ -959,6 +960,14 @@ public class NoteTitleTests
         Assert.EndsWith("…", title);
         Assert.True(title.Length <= NoteTitle.MaxLength + 1);
     }
+
+    [Theory]
+    [InlineData("a/b\\c:d*e?f\"g<h>i|j", "a_b_c_d_e_f_g_h_i_j")]
+    [InlineData("Обычное название", "Обычное название")]
+    [InlineData("", "note")]
+    [InlineData("   ", "note")]
+    [InlineData("///", "___")]
+    public void ToFileNameSanitizes(string title, string expected) => Assert.Equal(expected, NoteTitle.ToFileName(title));
 }
 
 public class NoteStoreTests
@@ -1012,5 +1021,96 @@ public class NoteStoreTests
         Assert.Single(back.Notes);
         Assert.Equal("line one\nline two", back.Notes[0].Content);
         Assert.Equal(note.Id, back.Notes[0].Id);
+    }
+}
+
+public class TaskListToggleTests
+{
+    [Fact]
+    public void ChecksAnUncheckedLine()
+    {
+        var result = TaskListToggle.Flip("- [ ] one\n- [ ] two", 1, desiredChecked: true);
+        Assert.Equal("- [ ] one\n- [x] two", result);
+    }
+
+    [Fact]
+    public void UnchecksAndAcceptsUppercaseX()
+    {
+        var result = TaskListToggle.Flip("- [X] done", 0, desiredChecked: false);
+        Assert.Equal("- [ ] done", result);
+    }
+
+    [Fact]
+    public void SettingTheSameStateIsANoOp()
+    {
+        const string content = "- [x] already done";
+        Assert.Equal(content, TaskListToggle.Flip(content, 0, desiredChecked: true));
+    }
+
+    [Theory]
+    [InlineData("just a line, not a task", 0)]
+    [InlineData("- no brackets here", 0)]
+    [InlineData("- [ ] on the only line", 5)]
+    public void StaleOrNonTaskLineIsANoOp(string content, int lineIndex) =>
+        Assert.Null(TaskListToggle.Flip(content, lineIndex, desiredChecked: true));
+
+    [Fact]
+    public void OnlyEditsTheTargetLine()
+    {
+        var result = TaskListToggle.Flip("- [ ] a\n- [ ] b\n- [ ] c", 1, desiredChecked: true);
+        Assert.Equal("- [ ] a\n- [x] b\n- [ ] c", result);
+    }
+}
+
+/// <summary>Pins down the exact Markdig 0.41.3 TaskLists contract MarkdownRenderer relies on —
+/// a regression guard against a future Markdig upgrade silently changing this behavior.</summary>
+public class MarkdigTaskListContractTests
+{
+    private static readonly Markdig.MarkdownPipeline Pipeline = new Markdig.MarkdownPipelineBuilder().UseTaskLists().Build();
+
+    [Fact]
+    public void ParsesCheckedAndUncheckedItems()
+    {
+        var document = Markdig.Markdown.Parse("- [ ] a\n- [x] b", Pipeline);
+        var list = Assert.IsType<Markdig.Syntax.ListBlock>(document[0]);
+        var items = list.Cast<Markdig.Syntax.ListItemBlock>().ToList();
+
+        var firstPara = (Markdig.Syntax.ParagraphBlock)items[0][0];
+        var first = Assert.IsType<Markdig.Extensions.TaskLists.TaskList>(firstPara.Inline!.FirstChild);
+        Assert.False(first.Checked);
+
+        var secondPara = (Markdig.Syntax.ParagraphBlock)items[1][0];
+        var second = Assert.IsType<Markdig.Extensions.TaskLists.TaskList>(secondPara.Inline!.FirstChild);
+        Assert.True(second.Checked);
+    }
+
+    /// <summary>The TaskList inline itself never gets a source position in 0.41.3 — Line and
+    /// Span are always (0,0,0) regardless of where the item actually is, confirmed by a real
+    /// parse (not assumed). MarkdownRenderer works around this by reading the CONTAINING
+    /// paragraph's Line instead, which is correctly tracked — this test is what would fail if
+    /// a future Markdig version changed either half of that.</summary>
+    [Fact]
+    public void TaskListInlineHasNoOwnPositionSoRendererUsesTheParagraphsLine()
+    {
+        var document = Markdig.Markdown.Parse("- [ ] a\n- [x] b\n- [ ] c", Pipeline);
+        var list = Assert.IsType<Markdig.Syntax.ListBlock>(document[0]);
+        var items = list.Cast<Markdig.Syntax.ListItemBlock>().ToList();
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            var para = (Markdig.Syntax.ParagraphBlock)items[i][0];
+            var task = Assert.IsType<Markdig.Extensions.TaskLists.TaskList>(para.Inline!.FirstChild);
+            Assert.Equal(0, task.Line); // the known quirk this test pins down
+            Assert.Equal(i, para.Line); // what MarkdownRenderer actually uses
+        }
+    }
+
+    [Fact]
+    public void PlainListItemHasNoTaskListInline()
+    {
+        var document = Markdig.Markdown.Parse("- not a task", Pipeline);
+        var list = Assert.IsType<Markdig.Syntax.ListBlock>(document[0]);
+        var item = Assert.IsType<Markdig.Syntax.ListItemBlock>(list[0]);
+        Assert.IsNotType<Markdig.Extensions.TaskLists.TaskList>(((Markdig.Syntax.ParagraphBlock)item[0]).Inline!.FirstChild);
     }
 }

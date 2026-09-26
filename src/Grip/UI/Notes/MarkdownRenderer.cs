@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Markdig; // just the root namespace, for the UseTaskLists() extension method — Block/Inline stay fully qualified below
 
 namespace Grip.UI.Notes;
 
@@ -23,7 +24,15 @@ namespace Grip.UI.Notes;
 /// </summary>
 internal static class MarkdownRenderer
 {
-    public static FlowDocument Render(string text, FrameworkElement host)
+    // Task-list syntax ("- [ ] foo" / "- [x] foo") is the only extension this needs —
+    // deliberately not UseAdvancedExtensions(), which pulls in 18 other extensions this
+    // hand-rolled renderer has no case for.
+    private static readonly Markdig.MarkdownPipeline Pipeline = new Markdig.MarkdownPipelineBuilder().UseTaskLists().Build();
+
+    /// <summary>onTaskToggle receives the 0-based source line of a clicked checkbox and its
+    /// new checked state; null (the default) renders checkboxes disabled — used for anything
+    /// that isn't backed by an editable note, like preview screenshots.</summary>
+    public static FlowDocument Render(string text, FrameworkElement host, Action<int, bool>? onTaskToggle = null)
     {
         Brush Res(string key) => host.TryFindResource(key) as Brush ?? Brushes.Gray;
         var doc = new FlowDocument
@@ -36,8 +45,9 @@ internal static class MarkdownRenderer
 
         try
         {
-            var parsed = Markdig.Markdown.Parse(text ?? "");
-            var ctx = new Ctx(Res("Grip.Text"), Res("Grip.TextSecondary"), Res("Grip.Accent"), Res("Grip.Control"), Res("Grip.Line"));
+            var parsed = Markdig.Markdown.Parse(text ?? "", Pipeline);
+            var ctx = new Ctx(Res("Grip.Text"), Res("Grip.TextSecondary"), Res("Grip.Accent"), Res("Grip.Control"), Res("Grip.Line"),
+                host.TryFindResource("Grip.CheckBox") as Style, onTaskToggle);
             foreach (var block in parsed)
             {
                 var rendered = RenderBlock(block, ctx);
@@ -53,7 +63,8 @@ internal static class MarkdownRenderer
         return doc;
     }
 
-    private readonly record struct Ctx(Brush Text, Brush TextSecondary, Brush Accent, Brush Control, Brush Line);
+    private readonly record struct Ctx(Brush Text, Brush TextSecondary, Brush Accent, Brush Control, Brush Line,
+        Style? CheckBoxStyle, Action<int, bool>? OnTaskToggle);
 
     private static Block? RenderBlock(Markdig.Syntax.Block block, Ctx ctx)
     {
@@ -94,8 +105,13 @@ internal static class MarkdownRenderer
                         if (child is Markdig.Syntax.ParagraphBlock para)
                         {
                             var p = new Paragraph { Margin = new Thickness(22, 0, 0, 4), TextIndent = -16 };
-                            if (firstBlockInItem) p.Inlines.Add(new Run(marker + "  "));
-                            AddInlines(p.Inlines, para.Inline, ctx);
+                            var task = firstBlockInItem ? para.Inline?.FirstChild as Markdig.Extensions.TaskLists.TaskList : null;
+                            if (task != null) AddTaskItem(p, task, para.Line, ctx);
+                            else
+                            {
+                                if (firstBlockInItem) p.Inlines.Add(new Run(marker + "  "));
+                                AddInlines(p.Inlines, para.Inline, ctx);
+                            }
                             section.Blocks.Add(p);
                         }
                         else
@@ -147,6 +163,34 @@ internal static class MarkdownRenderer
             default:
                 return null;
         }
+    }
+
+    /// <summary>Renders a task-list item's checkbox plus the rest of its line. The checkbox is
+    /// an InlineUIContainer — the one thing a FlowDocument can host that takes a click — wired
+    /// to Ctx.OnTaskToggle by source line, never by character offset (see TaskListToggle for
+    /// why a line number is enough: the raw-text editor and this read-only preview are never
+    /// visible at the same time, so no other line can shift between one click and the next).
+    ///
+    /// The line comes from the containing paragraph, not task.Line: Markdig 0.41.3 never sets
+    /// a TaskList inline's own source position (confirmed empirically — it's always 0,0), but
+    /// the marker is required to be the first thing in the paragraph, so the paragraph's own
+    /// (correct) Line is exactly the line the checkbox sits on.</summary>
+    private static void AddTaskItem(Paragraph p, Markdig.Extensions.TaskLists.TaskList task, int line, Ctx ctx)
+    {
+        var box = new CheckBox { IsChecked = task.Checked, Focusable = false, VerticalAlignment = VerticalAlignment.Center, Style = ctx.CheckBoxStyle };
+        if (ctx.OnTaskToggle is { } onToggle) box.Click += (_, _) => onToggle(line, box.IsChecked == true);
+        else box.IsEnabled = false;
+        p.Inlines.Add(new InlineUIContainer(box) { BaselineAlignment = BaselineAlignment.Center });
+        p.Inlines.Add(new Run(" "));
+
+        var rest = new Span();
+        for (var sibling = task.NextSibling; sibling != null; sibling = sibling.NextSibling) AddInline(rest.Inlines, sibling, ctx);
+        if (task.Checked)
+        {
+            rest.Foreground = ctx.TextSecondary;
+            rest.TextDecorations = TextDecorations.Strikethrough;
+        }
+        p.Inlines.Add(rest);
     }
 
     private static void AddInlines(InlineCollection into, Markdig.Syntax.Inlines.ContainerInline? container, Ctx ctx)

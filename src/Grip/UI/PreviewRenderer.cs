@@ -192,12 +192,14 @@ public static class PreviewRenderer
 
         var notes = services.Notepad.Notes;
         foreach (var blank in notes.Notes.ToList()) notes.Remove(blank.Id); // drop the auto-created empty note before seeding samples
+        // Первая (и потому выбранная по умолчанию) вкладка — со списком дел, чтобы
+        // скриншоты notepad/notepad-preview всегда показывали рендер чек-листов.
         var n1 = notes.Add();
-        notes.SetContent(n1.Id,
+        notes.SetContent(n1.Id, "Список дел\n- [x] Экспорт в ProRes для продюсера\n- [ ] Забрать диск у оператора", now);
+        var n2 = notes.Add();
+        notes.SetContent(n2.Id,
             "# Идеи для монтажа\n\nПопробовать **джамп-каты** во второй сцене.\n\n- Проверить синхрон звука на дубле 4\n- Обрезать паузу перед репликой Марка\n\n`ffmpeg -i in.mov -c copy out.mp4`",
             now);
-        var n2 = notes.Add();
-        notes.SetContent(n2.Id, "Список дел\n- Экспорт в ProRes для продюсера\n- Забрать диск у оператора", now);
 
         services.AppCatalog.SetForPreview(new[]
         {

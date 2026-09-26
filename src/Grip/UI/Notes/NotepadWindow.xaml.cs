@@ -1,7 +1,9 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using Grip.Core.Notes;
 using Grip.Interop;
 using Grip.UI.Common;
@@ -178,7 +180,61 @@ public partial class NotepadWindow : Window
         else Editor.Focus();
     }
 
-    private void RenderPreview() => Preview.Document = MarkdownRenderer.Render(Editor.Text, this);
+    private void RenderPreview()
+    {
+        // Rebuilding the document from scratch resets scroll to the top; carry the old
+        // position over so toggling a checkbox near the bottom of a long list doesn't
+        // yank the view back up. The viewer's ScrollViewer isn't in the visual tree yet
+        // on the very first render (Preview starts Collapsed), which is fine — nothing
+        // to preserve on a first render anyway.
+        var scroller = FindScrollViewer(Preview);
+        double offset = scroller?.VerticalOffset ?? 0;
+        Preview.Document = MarkdownRenderer.Render(Editor.Text, this, OnTaskToggle);
+        if (scroller != null) Dispatcher.BeginInvoke(() => scroller.ScrollToVerticalOffset(offset));
+    }
+
+    private void OnTaskToggle(int line, bool @checked)
+    {
+        if (_selectedId == null) return;
+        var note = Notes.Find(_selectedId);
+        var updated = note != null ? TaskListToggle.Flip(note.Content, line, @checked) : null;
+        if (updated == null) return;
+        Editor.Text = updated; // OnTextChanged -> Notes.SetContent -> existing debounced autosave
+        RenderPreview(); // rebuild so Line numbers stay correct for the next click
+    }
+
+    private void OnExportNote(object sender, RoutedEventArgs e)
+    {
+        if (_selectedId == null) return;
+        var note = Notes.Find(_selectedId);
+        if (note == null) return;
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            FileName = $"{NoteTitle.ToFileName(NoteTitle.From(note.Content, L.S("scratchpad.untitled")))}.md",
+            Filter = L.S("scratchpad.fileFilter"),
+        };
+        if (dialog.ShowDialog() != true) return;
+        try
+        {
+            File.WriteAllText(dialog.FileName, note.Content);
+            App.Services.Hud.Show(L.S("scratchpad.exported"), "ArrowUpload", HudTone.Success, force: true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            ConfirmDialog.Ask(L.F("scratchpad.exportFailed", ex.Message));
+        }
+    }
+
+    private static ScrollViewer? FindScrollViewer(DependencyObject root)
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is ScrollViewer sv) return sv;
+            if (FindScrollViewer(child) is { } nested) return nested;
+        }
+        return null;
+    }
 
     private void OnTogglePreview(object sender, RoutedEventArgs e)
     {

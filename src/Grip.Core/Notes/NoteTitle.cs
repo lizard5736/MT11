@@ -18,4 +18,15 @@ public static class NoteTitle
         if (string.IsNullOrEmpty(line)) return placeholder;
         return line.Length <= MaxLength ? line : line[..MaxLength].TrimEnd() + "…";
     }
+
+    private static readonly char[] InvalidFileNameChars = "\\/:*?\"<>|".ToCharArray();
+
+    /// <summary>A title made safe to use as a Windows file name: characters Explorer would
+    /// reject become underscores. Never blank — an empty or all-invalid title falls back to
+    /// "note" rather than leaving a save dialog with no name at all.</summary>
+    public static string ToFileName(string title)
+    {
+        var cleaned = new string(title.Select(c => InvalidFileNameChars.Contains(c) ? '_' : c).ToArray()).Trim();
+        return cleaned.Length > 0 ? cleaned : "note";
+    }
 }
