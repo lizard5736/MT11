@@ -50,25 +50,44 @@ public static class PreviewRenderer
         LanguageService.Apply(AppLanguage.Russian);
         Seed(services);
 
-        foreach (var theme in new[] { AppTheme.Dark, AppTheme.Light })
+        foreach (var theme in new[] { AppTheme.Dark, AppTheme.Light, AppTheme.Doom })
         {
             services.Settings.Current.General.Theme = theme;
             services.Theme.Apply(theme, force: true);
-            string suffix = theme == AppTheme.Dark ? "" : "-light";
+            string suffix = theme switch { AppTheme.Light => "-light", AppTheme.Doom => "-doom", _ => "" };
+            // Dark gets the full screenshot pass; Light and Doom get a small spot check —
+            // enough to catch a palette that doesn't reach everywhere, without doubling or
+            // tripling every screen in the app for each new theme.
+            bool fullPass = theme == AppTheme.Dark;
 
             foreach (var section in new[] { "keepAwake", "clipboard", "utilities", "controls", "toggles", "monitor" })
             {
-                if (theme == AppTheme.Light && section != "keepAwake" && section != "clipboard") continue;
+                if (!fullPass && section != "keepAwake" && section != "clipboard" && section != "monitor") continue;
                 Try($"panel-{section}{suffix}", () =>
                 {
                     services.Settings.Current.Panel.Layout = PanelLayoutMode.Tabs;
                     services.Settings.Current.Panel.LastSection = section;
                     var window = new FlyoutWindow { IsPreview = true };
                     window.Rebuild();
+                    // The preview window is measured off-screen and never Show()n, so the
+                    // fire strip's normal IsVisible gate needs bypassing to paint a frame.
+                    if (theme == AppTheme.Doom) window.PreviewShowDoomFire();
                     RenderWindow(window, 392, null, Path.Combine(dir, $"panel-{section}{suffix}.png"), refresh: true);
                 });
             }
-            if (theme == AppTheme.Light) goto settingsLight;
+            if (!fullPass)
+            {
+                if (theme == AppTheme.Doom)
+                {
+                    Try($"notepad-preview{suffix}", () =>
+                    {
+                        var window = new NotepadWindow { IsPreview = true };
+                        window.PreviewShowMarkdown();
+                        RenderWindow(window, 420, 480, Path.Combine(dir, $"notepad-preview{suffix}.png"));
+                    });
+                }
+                goto settingsLight;
+            }
 
             Try("panel-list", () =>
             {
@@ -137,7 +156,7 @@ public static class PreviewRenderer
             Try("onboarding", () => RenderWindow(new OnboardingWindow(), 640, null, Path.Combine(dir, "onboarding.png")));
 
         settingsLight:
-            foreach (var page in theme == AppTheme.Dark
+            foreach (var page in fullPass
                          ? new[] { "general", "features", "access", "hotkeys", "clipboard", "links", "shelf", "commandBar", "radial", "toggles", "keepAwake", "about" }
                          : new[] { "features" })
             {

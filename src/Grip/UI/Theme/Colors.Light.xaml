@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Grip «Светлая» palette. Brushes are frozen and swapped as a whole dictionary. -->
+    <FontFamily x:Key="Grip.Font.Display">Segoe UI Variable Display, Segoe UI</FontFamily>
     <Color x:Key="Grip.Color.Bg">#F5F4F1</Color>
     <Color x:Key="Grip.Color.BgAlt">#EDEBE7</Color>
     <Color x:Key="Grip.Color.Surface">#FFFFFF</Color>

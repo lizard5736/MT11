@@ -19,12 +19,15 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Header: mark, name, live status -->
             <DockPanel Margin="2,0,0,12">
                 <c:GripMark Width="34" Height="34" TileBrush="{DynamicResource Grip.Surface}" VerticalAlignment="Center"
-                            ShowDot="{Binding IsActive, ElementName=StatusDot}" />
+                            ShowDot="{Binding IsActive, ElementName=StatusDot}"
+                            MarkBrush="{DynamicResource Grip.Accent}" DotBrush="{DynamicResource Grip.Rec}"
+                            PixelImage="{DynamicResource Grip.Mark.PixelImage}" />
                 <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                     <TextBlock Text="Grip" Style="{StaticResource Grip.Text.Subtitle}" FontSize="16" />
                     <Border x:Name="StatusPill" Style="{StaticResource Grip.Pill}" HorizontalAlignment="Left" Margin="0,3,0,0">
@@ -61,6 +64,10 @@
                         Click="OnToggleLayout" />
                 <Button Grid.Column="2" Style="{StaticResource Grip.Button.Ghost}" l:Ui.Icon="Power" Content="{l:T panel.quit}" Click="OnQuit" />
             </Grid>
+
+            <!-- DOOM theme only: a fire strip along the bottom edge, bled flush to the
+                 window's own hairline border past Root's usual side/bottom margins. -->
+            <Image x:Name="FireStrip" Grid.Row="4" Height="30" Margin="-14,10,-14,-8" Stretch="Fill" Visibility="Collapsed" />
         </Grid>
     </Border>
 </Window>

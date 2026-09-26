@@ -16,7 +16,14 @@ public static class AboutPage
     public static void Build(PageBuilder b)
     {
         var header = new DockPanel { Margin = new Thickness(0, 4, 0, 4) };
-        header.Children.Add(new GripMark { Width = 56, Height = 56, TileBrush = (System.Windows.Media.Brush)Application.Current.FindResource("Grip.Control") });
+        header.Children.Add(new GripMark
+        {
+            Width = 56, Height = 56,
+            TileBrush = (System.Windows.Media.Brush)Application.Current.FindResource("Grip.Control"),
+            MarkBrush = (System.Windows.Media.Brush)Application.Current.FindResource("Grip.Accent"),
+            DotBrush = (System.Windows.Media.Brush)Application.Current.FindResource("Grip.Rec"),
+            PixelImage = Application.Current.TryFindResource("Grip.Mark.PixelImage") as System.Windows.Media.ImageSource,
+        });
         var text = new StackPanel { Margin = new Thickness(16, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
         text.Children.Add(new TextBlock { Text = "Grip", Style = (Style)Application.Current.FindResource("Grip.Text.Title") });
         var version = typeof(App).Assembly.GetName().Version;

@@ -16,7 +16,9 @@
         <Border Background="{DynamicResource Grip.BgAlt}" BorderBrush="{DynamicResource Grip.Line}" BorderThickness="0,0,1,0">
             <DockPanel Margin="14,14,14,12">
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,2,0,16">
-                    <c:GripMark Width="30" Height="30" TileBrush="{DynamicResource Grip.Surface}" />
+                    <c:GripMark Width="30" Height="30" TileBrush="{DynamicResource Grip.Surface}"
+                                MarkBrush="{DynamicResource Grip.Accent}" DotBrush="{DynamicResource Grip.Rec}"
+                                PixelImage="{DynamicResource Grip.Mark.PixelImage}" />
                     <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
                         <TextBlock Text="Grip" Style="{StaticResource Grip.Text.Subtitle}" />
                         <TextBlock Text="{l:T app.tagline}" Style="{StaticResource Grip.Text.Caption}" />

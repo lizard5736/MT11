@@ -4,8 +4,12 @@
                     xmlns:ui="clr-namespace:Grip.UI">
 
     <!-- ============ Type ============ -->
+    <!-- Grip.Font/.Mono: one face everywhere, on purpose — body text stays legible and
+         doesn't change look with the theme. Grip.Font.Display is the exception: it lives in
+         each Colors.*.xaml palette instead of here, because DOOM swaps it for a display face
+         of its own (see Grip.Text.Title/.Hero below, which read it as a DynamicResource so
+         that swap actually takes effect without a restart). -->
     <FontFamily x:Key="Grip.Font">Segoe UI Variable Text, Segoe UI</FontFamily>
-    <FontFamily x:Key="Grip.Font.Display">Segoe UI Variable Display, Segoe UI</FontFamily>
     <FontFamily x:Key="Grip.Font.Mono">Cascadia Mono, Consolas</FontFamily>
 
     <ui:BoolToVisibilityConverter x:Key="BoolToVis" />
@@ -42,12 +46,12 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style x:Key="Grip.Text.Title" TargetType="TextBlock" BasedOn="{StaticResource Grip.Text.Body}">
-        <Setter Property="FontFamily" Value="{StaticResource Grip.Font.Display}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Grip.Font.Display}" />
         <Setter Property="FontSize" Value="22" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style x:Key="Grip.Text.Hero" TargetType="TextBlock" BasedOn="{StaticResource Grip.Text.Body}">
-        <Setter Property="FontFamily" Value="{StaticResource Grip.Font.Display}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Grip.Font.Display}" />
         <Setter Property="FontSize" Value="28" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>

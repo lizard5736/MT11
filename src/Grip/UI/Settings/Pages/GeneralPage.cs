@@ -25,6 +25,7 @@ public static class GeneralPage
             (AppTheme.Dark, L.S("general.theme.dark")),
             (AppTheme.Light, L.S("general.theme.light")),
             (AppTheme.System, L.S("general.theme.system")),
+            (AppTheme.Doom, L.S("general.theme.doom")),
         }, s => s.General.Theme, (s, v) => s.General.Theme = v, icon: "DarkTheme");
         b.Toggle("general.startup", "general.startup.desc", s => s.General.LaunchAtStartup, (s, v) =>
         {

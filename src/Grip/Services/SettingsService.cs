@@ -97,24 +97,27 @@ public sealed class ThemeService
     public void Apply(AppTheme theme, bool force = false)
     {
         _setting = theme;
-        bool dark = theme switch
+        string palette = theme switch
         {
-            AppTheme.Light => false,
-            AppTheme.System => !AppsUseLightTheme(),
-            _ => true,
+            AppTheme.Light => "Light",
+            AppTheme.Doom => "Doom",
+            AppTheme.System => AppsUseLightTheme() ? "Light" : "Dark",
+            _ => "Dark",
         };
-        if (!force && dark == IsDark && Application.Current.Resources.MergedDictionaries.Count > 0
-            && Application.Current.Resources.MergedDictionaries[0].Source?.OriginalString.Contains(dark ? "Dark" : "Light") == true)
+        // Doom keeps dark DWM chrome (dark title-bar buttons) — only Light is a light window.
+        bool dark = palette != "Light";
+        if (!force && Application.Current.Resources.MergedDictionaries.Count > 0
+            && Application.Current.Resources.MergedDictionaries[0].Source?.OriginalString.EndsWith($"Colors.{palette}.xaml") == true)
             return;
 
         IsDark = dark;
-        var palette = new ResourceDictionary
+        var dict = new ResourceDictionary
         {
-            Source = new Uri($"pack://application:,,,/Grip;component/UI/Theme/Colors.{(dark ? "Dark" : "Light")}.xaml", UriKind.Absolute),
+            Source = new Uri($"pack://application:,,,/Grip;component/UI/Theme/Colors.{palette}.xaml", UriKind.Absolute),
         };
         var merged = Application.Current.Resources.MergedDictionaries;
-        if (merged.Count > 0) merged[0] = palette;
-        else merged.Insert(0, palette);
+        if (merged.Count > 0) merged[0] = dict;
+        else merged.Insert(0, dict);
         ThemeChanged?.Invoke(this, EventArgs.Empty);
     }
 

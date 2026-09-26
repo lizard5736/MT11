@@ -98,6 +98,7 @@ public sealed class RadialMenuView : FrameworkElement
         var text = Res("Grip.Text");
         var secondary = Res("Grip.TextSecondary");
         var hub = Res("Grip.Bg");
+        var shadowColor = TryFindResource("Grip.Color.Shadow") as Color? ?? Colors.Black;
 
         // Soft shadow, then the ring itself.
         double spread = 12;
@@ -105,8 +106,8 @@ public sealed class RadialMenuView : FrameworkElement
         {
             GradientStops =
             {
-                new GradientStop(Color.FromArgb(90, 0, 0, 0), (outer - 4) / (outer + spread)),
-                new GradientStop(Color.FromArgb(0, 0, 0, 0), 1),
+                new GradientStop(Color.FromArgb(90, shadowColor.R, shadowColor.G, shadowColor.B), (outer - 4) / (outer + spread)),
+                new GradientStop(Color.FromArgb(0, shadowColor.R, shadowColor.G, shadowColor.B), 1),
             },
         };
         dc.DrawEllipse(shadow, null, new Point(center.X, center.Y + 3), outer + spread, outer + spread);

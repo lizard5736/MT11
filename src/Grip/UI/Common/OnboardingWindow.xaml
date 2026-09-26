@@ -8,7 +8,9 @@
         WindowStartupLocation="CenterScreen" Icon="pack://application:,,,/Grip;component/Assets/grip.ico">
     <StackPanel Margin="36,30,36,28">
         <StackPanel Orientation="Horizontal">
-            <c:GripMark Width="64" Height="64" TileBrush="{DynamicResource Grip.Surface}" />
+            <c:GripMark Width="64" Height="64" TileBrush="{DynamicResource Grip.Surface}"
+                        MarkBrush="{DynamicResource Grip.Accent}" DotBrush="{DynamicResource Grip.Rec}"
+                        PixelImage="{DynamicResource Grip.Mark.PixelImage}" />
             <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
                 <TextBlock Text="{l:T onboarding.title}" Style="{StaticResource Grip.Text.Hero}" />
                 <TextBlock Text="{l:T app.tagline}" Style="{StaticResource Grip.Text.Secondary}" FontSize="13" Margin="0,2,0,0" />

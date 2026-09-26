@@ -51,6 +51,11 @@ public sealed class TrayService : IDisposable
         Render();
     }
 
+    /// <summary>Redraws the icon even though neither the dot's visibility nor the tooltip
+    /// changed — SetStatus's own guard would otherwise skip a repaint on a theme switch
+    /// alone. Call after Theme.Apply so the accent dot picks up the new palette right away.</summary>
+    public void Refresh() => Render();
+
     private void OnPreferenceChanged(object? sender, Microsoft.Win32.UserPreferenceChangedEventArgs e) =>
         Application.Current?.Dispatcher.BeginInvoke(Render);
 
@@ -60,12 +65,26 @@ public sealed class TrayService : IDisposable
     private void Render()
     {
         int size = Math.Max(16, NativeMethods.GetSystemMetrics(49 /* SM_CXSMICON */));
-        bool lightTaskbar = ThemeService.TaskbarIsLight();
-        var mark = new SolidColorBrush(lightTaskbar ? Color.FromRgb(0x1A, 0x1A, 0x1A) : Colors.White);
-        var dot = new SolidColorBrush(Color.FromRgb(0xFF, 0xB0, 0x20));
         var visual = new DrawingVisual();
         using (var dc = visual.RenderOpen())
-            GripMark.Draw(dc, new Rect(0, 0, size, size), mark, _dotVisible ? dot : null, tile: false);
+        {
+            // The DOOM theme draws its own hand-pixelled mark instead of the usual procedural
+            // one, same bitmap and same DynamicResource key the panel header/settings/
+            // onboarding/about page all read — see Colors.Doom.xaml.
+            if (Application.Current?.TryFindResource("Grip.Mark.PixelImage") is ImageSource pixelMark)
+            {
+                RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.NearestNeighbor);
+                RenderOptions.SetEdgeMode(visual, EdgeMode.Aliased);
+                dc.DrawImage(pixelMark, new Rect(0, 0, size, size));
+            }
+            else
+            {
+                bool lightTaskbar = ThemeService.TaskbarIsLight();
+                var mark = new SolidColorBrush(lightTaskbar ? Color.FromRgb(0x1A, 0x1A, 0x1A) : Colors.White);
+                var dot = new SolidColorBrush(App.Services.Theme.Color("Accent"));
+                GripMark.Draw(dc, new Rect(0, 0, size, size), mark, _dotVisible ? dot : null, tile: false);
+            }
+        }
 
         var bitmap = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
         bitmap.Render(visual);

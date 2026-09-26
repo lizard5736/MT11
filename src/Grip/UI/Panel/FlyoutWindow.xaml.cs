@@ -22,6 +22,7 @@ public partial class FlyoutWindow : Window
     private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private string? _selected;
     private bool _placing;
+    private Controls.DoomFire? _fire;
 
     /// <summary>When the panel last hid, so a click on the tray icon that caused the hide doesn't reopen it.</summary>
     public DateTime LastHidden { get; private set; }
@@ -59,16 +60,47 @@ public partial class FlyoutWindow : Window
         Closed += (_, _) =>
         {
             _statusTimer.Stop();
+            _fire?.Stop();
             App.Services.Theme.ThemeChanged -= OnThemeChanged;
         };
     }
 
-    private void OnThemeChanged(object? sender, EventArgs e) => ApplyChrome();
+    private void OnThemeChanged(object? sender, EventArgs e)
+    {
+        ApplyChrome();
+        UpdateFireStrip();
+    }
 
     private void ApplyChrome()
     {
         var theme = App.Services.Theme;
         WindowStyling.ApplyChrome(this, theme.Color("Bg"), theme.Color("Text"), theme.Color("Line"), theme.IsDark);
+    }
+
+    /// <summary>Shows and runs the fire strip only under the DOOM theme, and only while the
+    /// panel is actually visible — switching themes with the panel closed just gets it ready
+    /// for the next ShowPanel() rather than ticking a timer nobody can see.</summary>
+    private void UpdateFireStrip()
+    {
+        bool doom = App.Services.Settings.Current.General.Theme == AppTheme.Doom;
+        FireStrip.Visibility = doom ? Visibility.Visible : Visibility.Collapsed;
+        if (!doom)
+        {
+            _fire?.Stop();
+            return;
+        }
+        _fire ??= new Controls.DoomFire(FireStrip);
+        if (IsVisible) _fire.Start();
+    }
+
+    /// <summary>Preview-harness hook: the preview window is measured and rendered off-screen
+    /// but never actually Show()n, so UpdateFireStrip's IsVisible gate would otherwise leave
+    /// the strip blank in a screenshot. Paints one frame regardless.</summary>
+    public void PreviewShowDoomFire()
+    {
+        FireStrip.Visibility = Visibility.Visible;
+        _fire ??= new Controls.DoomFire(FireStrip);
+        _fire.WarmUp();
     }
 
     // ---------- show / hide ----------
@@ -87,6 +119,7 @@ public partial class FlyoutWindow : Window
         Activate();
         if (wasHidden) PopupMotion.Enter(Root, RootShift);
         _statusTimer.Start();
+        UpdateFireStrip();
         foreach (var section in VisibleSections()) section.Refresh();
     }
 
@@ -94,6 +127,7 @@ public partial class FlyoutWindow : Window
     {
         if (!IsVisible) return;
         _statusTimer.Stop();
+        _fire?.Stop();
         foreach (var section in _sections.Values) section.Suspend();
         LastHidden = DateTime.UtcNow;
         PopupMotion.Exit(Root, RootShift, Hide);

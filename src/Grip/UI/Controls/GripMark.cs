@@ -26,6 +26,10 @@ public sealed class GripMark : FrameworkElement
         nameof(TileBrush), typeof(Brush), typeof(GripMark),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
+    public static readonly DependencyProperty PixelImageProperty = DependencyProperty.Register(
+        nameof(PixelImage), typeof(ImageSource), typeof(GripMark),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
     static GripMark()
     {
         IsHitTestVisibleProperty.OverrideMetadata(typeof(GripMark), new UIPropertyMetadata(false));
@@ -36,6 +40,11 @@ public sealed class GripMark : FrameworkElement
     public bool ShowDot { get => (bool)GetValue(ShowDotProperty); set => SetValue(ShowDotProperty, value); }
     /// <summary>When set, the mark sits on a rounded graphite tile like the app icon.</summary>
     public Brush? TileBrush { get => (Brush?)GetValue(TileBrushProperty); set => SetValue(TileBrushProperty, value); }
+
+    /// <summary>When set, draws this hand-pixelled bitmap instead of the procedural ring —
+    /// the DOOM theme's own take on the mark, bound via DynamicResource so it appears only
+    /// while that theme is active.</summary>
+    public ImageSource? PixelImage { get => (ImageSource?)GetValue(PixelImageProperty); set => SetValue(PixelImageProperty, value); }
 
     protected override Size MeasureOverride(Size availableSize)
     {
@@ -52,12 +61,23 @@ public sealed class GripMark : FrameworkElement
         if (TileBrush != null)
         {
             dc.DrawRoundedRectangle(TileBrush, null, new Rect(origin, new Size(side, side)), side * 0.22, side * 0.22);
-            Draw(dc, new Rect(origin.X + side * 0.1, origin.Y + side * 0.1, side * 0.8, side * 0.8), MarkBrush, ShowDot ? DotBrush : null, tile: true);
+            var inset = new Rect(origin.X + side * 0.1, origin.Y + side * 0.1, side * 0.8, side * 0.8);
+            if (PixelImage != null) DrawPixelImage(dc, inset);
+            else Draw(dc, inset, MarkBrush, ShowDot ? DotBrush : null, tile: true);
         }
         else
         {
-            Draw(dc, new Rect(origin, new Size(side, side)), MarkBrush, ShowDot ? DotBrush : null, tile: false);
+            var square = new Rect(origin, new Size(side, side));
+            if (PixelImage != null) DrawPixelImage(dc, square);
+            else Draw(dc, square, MarkBrush, ShowDot ? DotBrush : null, tile: false);
         }
+    }
+
+    private void DrawPixelImage(DrawingContext dc, Rect square)
+    {
+        RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.NearestNeighbor);
+        RenderOptions.SetEdgeMode(this, EdgeMode.Aliased);
+        dc.DrawImage(PixelImage, square);
     }
 
     /// <summary>

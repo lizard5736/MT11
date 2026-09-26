@@ -61,6 +61,7 @@ public static partial class StringTable
         A("general.theme.dark", "Графит", "Graphite");
         A("general.theme.light", "Светлая", "Light");
         A("general.theme.system", "Как в Windows", "Same as Windows");
+        A("general.theme.doom", "DOOM 1993", "DOOM 1993");
         A("general.startup", "Запускать вместе с Windows", "Start with Windows");
         A("general.startup.desc", "Grip тихо появится в трее после входа в систему.", "Grip quietly appears in the tray after you sign in.");
         A("general.hud", "Подсказки на экране", "On-screen hints");
@@ -250,8 +251,9 @@ public static partial class StringTable
         A("about.imported", "Настройки загружены", "Settings loaded");
         A("about.importFailed", "Не получилось прочитать файл: {0}", "Couldn't read the file: {0}");
         A("about.notices", "Сторонние компоненты", "Third-party notices");
-        A("about.notices.text", "Иконки — Fluent UI System Icons © Microsoft, лицензия MIT. MVVM — CommunityToolkit.Mvvm © .NET Foundation, лицензия MIT.",
-            "Icons: Fluent UI System Icons © Microsoft, MIT License. MVVM: CommunityToolkit.Mvvm © .NET Foundation, MIT License.");
+        A("about.notices.text",
+            "Иконки — Fluent UI System Icons © Microsoft (MIT). MVVM — CommunityToolkit.Mvvm © .NET Foundation (MIT). Датчик AMD — PawnIO.Modules © namazso (LGPL-2.1). Шрифт темы DOOM 1993 — Black Ops One © The Black-Ops Project Authors (SIL OFL 1.1). Подробности и хеши — в THIRD_PARTY_NOTICES.md исходного кода.",
+            "Icons: Fluent UI System Icons © Microsoft (MIT). MVVM: CommunityToolkit.Mvvm © .NET Foundation (MIT). AMD sensor: PawnIO.Modules © namazso (LGPL-2.1). DOOM theme font: Black Ops One © The Black-Ops Project Authors (SIL OFL 1.1). Details and hashes in THIRD_PARTY_NOTICES.md.");
         A("about.fileFilter", "Настройки Grip (*.json)|*.json", "Grip settings (*.json)|*.json");
 
         // Onboarding

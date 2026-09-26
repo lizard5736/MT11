@@ -38,7 +38,7 @@ public sealed class AppSettings
 
 public enum AppLanguage { System, Russian, English }
 
-public enum AppTheme { Dark, Light, System }
+public enum AppTheme { Dark, Light, System, Doom }
 
 public enum PanelLayoutMode { Tabs, List }
 

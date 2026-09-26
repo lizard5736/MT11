@@ -126,6 +126,9 @@ public sealed class AppServices : IDisposable
             Settings.Current.IsInstalled(FeatureIds.KeepAwake)));
         KeepAwake.Changed += (_, _) => UpdateTray();
         TrayReadouts.Sampled += (_, _) => UpdateTray();
+        // SetStatus's own guard skips a repaint when neither the dot nor the tooltip changed —
+        // which is exactly what happens on a theme switch alone, so the icon needs its own hook.
+        Theme.ThemeChanged += (_, _) => Tray.Refresh();
         Settings.Changed += (_, _) => ApplySettings();
         ApplySettings();
         Tray.Show();
